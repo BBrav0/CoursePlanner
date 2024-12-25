@@ -1,14 +1,41 @@
-import warnings
-warnings.filterwarnings("ignore", category=DeprecationWarning)
-
 from tkinter import *
+from tkinter import ttk
+
+def make_draggable(widget):
+    widget.bind("<Button-1>", on_drag_start)
+    widget.bind("<B1-Motion>", on_drag_motion)
+
+def on_drag_start(event):
+    widget = event.widget
+    widget._drag_start_x = event.x
+    widget._drag_start_y = event.y
+
+def on_drag_motion(event):
+    widget = event.widget
+    x = widget.winfo_x() - widget._drag_start_x + event.x
+    y = widget.winfo_y() - widget._drag_start_y + event.y
+    widget.place(x=x, y=y)
+# Function to display user text when button is clicked
+
+def clicked():
+    try:
+        tem = txt.get()
+        yea = int(tem)
+        lbl.configure(text="Thank you, your course map is loading...")
+    except ValueError:
+        lbl.configure(text="Incorrect input. Please Try again")
+    
+
 
 # Create root window
 root = Tk()
 
+#TK_SILENCE_DEPRECATION = 1
 # Root window title and dimension
-root.title("Welcome to GeekForGeeks")
-root.geometry('350x200')  # Set geometry (width x height)
+root.title("Ben's Course Planner")
+root.geometry('1280x720')  # Set geometry (width x height)
+
+
 
 # Configure grid layout
 root.rowconfigure(0, weight=1)
@@ -22,19 +49,28 @@ menu.add_cascade(label='File', menu=item)
 root.config(menu=menu)
 
 # Add widgets
-lbl = Label(root, text="Are you a Geek?", borderwidth=2, relief="solid")
-lbl.grid(row=0, column=0, padx=10, pady=10, sticky="w")
+lbl = Label(root, text="Please enter your start year (e.g. '2022') and semester", borderwidth=2, relief="solid")
+lbl.pack(side=TOP, padx=10, pady=10)
 
 txt = Entry(root, width=10, borderwidth=2, relief="solid")
-txt.grid(row=0, column=1, padx=10, pady=10, sticky="e")
+txt.pack(side=TOP, padx=10, pady=10)
 
-# Function to display user text when button is clicked
-def clicked():
-    res = "You wrote: " + txt.get()
-    lbl.configure(text=res)
+sems = ["Fall","Summer","Spring"]
 
-btn = Button(root, text="Click me", fg="red", command=clicked, borderwidth=2, relief="solid")
-btn.grid(row=0, column=2, padx=10, pady=10, sticky="e")
+variable = StringVar(root)
+variable.set(sems[0]) # default value
+
+drp = OptionMenu(root, variable, *sems)
+drp.pack(side=TOP, padx=10, pady=10)
+
+btn = Button(root, text="Submit", fg="red", command=clicked, borderwidth=2, relief="solid")
+btn.pack(side=TOP, padx=10, pady=10)
+
+
+
 
 # Execute Tkinter
+root.lift()
+root.focus_force()
+
 root.mainloop()
