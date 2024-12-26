@@ -1,5 +1,6 @@
 from tkinter import *
 from tkinter import ttk
+from tkinter import filedialog
 
 # WINDOW CLEAR METHOD
 def clear_window():
@@ -107,6 +108,8 @@ def add(xx, yy):
 # COURSE ADDED BUTTON
 def added(xx, yy, co, ti, cr, gr):
 
+    courses.append(Course(co, ti, cr, gr))
+
     frame = Frame(root, borderwidth=3, relief="raised", width=180, height=70, bg="lightgrey")
     frame.place(x=xx+10, y=yy)
 
@@ -128,7 +131,25 @@ def added(xx, yy, co, ti, cr, gr):
 
     popup.destroy()
 
+def save_as():
+    file_path = filedialog.asksaveasfilename(
+    title="Save As",
+    defaultextension=".txt",  # Set default file extension
+    filetypes=[("Text Files", "*.txt"), ("All Files", "*.*")],  # File type filters
+    )
 
+# Check if a file path was selected
+    if file_path:
+        print(f"File will be saved at: {file_path}")
+        # Save file operation
+        with open(file_path, 'w') as file:
+            for c in courses:
+                file.write("^*^\n")
+                file.write(c.code+"\n")
+                file.write(c.title+"\n")
+                file.write(c.credits+"\n")
+                file.write(c.grade+"\n")
+    root.focus_force()
 
 #
 # COURSE PAGE BUILD
@@ -184,9 +205,12 @@ root.columnconfigure(0, weight=1)
 menu = Menu(root)
 item = Menu(menu, tearoff=0) 
 item.add_command(label='New', command=start_win)
-item.add_command(label='Save as', command=start_win)
+item.add_command(label='Save as', command=save_as)
 menu.add_cascade(label='File', menu=item)
 root.config(menu=menu)
+
+#Array of courses
+global courses
 
 
 start_win()
@@ -194,3 +218,10 @@ root.lift()
 root.focus_force()
 
 root.mainloop()
+
+class Course:
+    def __init__(self, co, ti, cr, gr):
+        self.code = co
+        self.title = ti
+        self.credits = cr
+        self.grade = gr
