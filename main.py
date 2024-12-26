@@ -38,6 +38,8 @@ def clicked():
 # START PAGE BUILD
 #
 def start_win():
+    clear_window()
+
     global lbl 
     lbl = Label(root, text="Please enter your start year (e.g. '2022') and semester", borderwidth=2, relief="solid")
     lbl.pack(side=TOP, padx=10, pady=10)
@@ -57,6 +59,7 @@ def start_win():
 
     btn = Button(root, text="Submit", fg="black", command=clicked, borderwidth=2, relief="solid")
     btn.pack(side=TOP, padx=10, pady=10)
+
 
 # ADD COURSE BUTTON
 def add(xx, yy):
@@ -88,31 +91,40 @@ def add(xx, yy):
     grade = OptionMenu(popup, variable, *grades)
     grade.place(x=100, y=150)
 
-    global code
     code = Entry(popup, width=15, borderwidth=2, relief="solid")
     code.place(x=100, y=0)
 
-    global title
     title = Entry(popup, width=20, borderwidth=2, relief="solid")
     title.place(x=100, y=50)
 
-    global cred
     cred = Entry(popup, width=5, borderwidth=2, relief="solid")
     cred.place(x=100, y=100)
 
-    btn = Button(popup, text="Add", fg="black", command=lambda: added(xx, yy), borderwidth=2, relief="solid")
+    btn = Button(popup, text="Add", fg="black", command=lambda: added(xx, yy, code.get(), title.get(), cred.get(), variable.get()), borderwidth=2, relief="solid")
     btn.pack(side=BOTTOM, pady=50)
 
 
 # COURSE ADDED BUTTON
-def added(xx, yy):
-    variable.get()
-    title.get()
-    cred.get()
-    code.get()
+def added(xx, yy, co, ti, cr, gr):
 
-    frame = Frame(root, borderwidth=3, relief="raised", width=180, height=50, bg="lightgrey")
+    frame = Frame(root, borderwidth=3, relief="raised", width=180, height=70, bg="lightgrey")
     frame.place(x=xx+10, y=yy)
+
+    code = Label(frame, text=co, fg="black", borderwidth=0, font=("Helvetica", 12, "bold"), relief="solid",bg="lightgrey")
+    code.place(x=5, y=5)
+
+    title = Label(frame, text=ti, fg="black", borderwidth=0, font=("Helvetica", 14), relief="solid",bg="lightgrey",wraplength=170)
+    title.place(x=5, y=20)
+
+    credits = Label(frame, text=cr+" credits", fg="black", borderwidth=0, font=("Helvetica", 12, "bold"), relief="solid",bg="lightgrey")
+    credits.place(x=125, y=45)
+
+    grade = Label(frame, text=gr, fg="black", borderwidth=0, font=("Helvetica", 12, "bold"), relief="solid",bg="lightgrey")
+    grade.place(x=155, y=5)
+
+    if (yy<600):
+        btn = Button(root, text="+", fg="black", command=lambda: add(xx, yy+75), borderwidth=2, relief="solid")
+        btn.place(x=xx+70, y=yy+100)
 
     popup.destroy()
 
@@ -122,6 +134,15 @@ def added(xx, yy):
 # COURSE PAGE BUILD
 #
 def course_page(year):
+
+    canvas = Canvas(root)
+    canvas.pack(side=LEFT, fill=BOTH, expand=True)
+
+    scrollbar = Scrollbar(root, orient=HORIZONTAL, command=canvas.xview)
+    scrollbar.pack(side=BOTTOM, fill=X)
+    
+    canvas.configure(xscrollcommand=scrollbar.set)
+
     st = str(variable.get()) +" "+str(year)
     clear_window()
     i = 11
@@ -131,7 +152,7 @@ def course_page(year):
         nex = Label(root, text=cur +" "+str(year), borderwidth=2, relief="solid")
         nex.place(x=j, y=0)
 
-        frame = Frame(root, borderwidth=5, relief="sunken", width=200, height=500)
+        frame = Frame(root, borderwidth=5, relief="sunken", width=200, height=750)
         frame.place(x=j, y=20)
 
         btn = Button(root, text="+", fg="black", command=lambda x=j: add(x, 30), borderwidth=2, relief="solid")
@@ -155,14 +176,15 @@ def course_page(year):
 #
 root = Tk()
 root.title("Ben's Course Planner")
-root.geometry('1280x720')  
+root.geometry('1920x1080')  
 
 root.rowconfigure(0, weight=1)
 root.columnconfigure(0, weight=1)
 
 menu = Menu(root)
 item = Menu(menu, tearoff=0) 
-item.add_command(label='New')
+item.add_command(label='New', command=start_win)
+item.add_command(label='Save as', command=start_win)
 menu.add_cascade(label='File', menu=item)
 root.config(menu=menu)
 
