@@ -2,6 +2,15 @@ from tkinter import *
 from tkinter import ttk
 from tkinter import filedialog
 
+class Course:
+    def __init__(self, co, ti, cr, gr, se, ye):
+        self.code = co
+        self.title = ti
+        self.credits = cr
+        self.grade = gr
+        self.sem = se
+        self.year = ye
+
 # WINDOW CLEAR METHOD
 def clear_window():
     for widget in root.winfo_children():
@@ -29,9 +38,14 @@ def on_drag_motion(event):
 
 # SUBMIT BUTTON ON MAIN PAGE METHOD
 def clicked():
+    global year
+    global startsem
+    startsem = "Fall"
+    year = 0
     try:
         year = int(txt.get())
-        course_page(year)
+        startsem = variable.get()
+        course_page(year, startsem)
     except ValueError:
         lbl.configure(text="Incorrect input. Please try again")
 
@@ -60,7 +74,6 @@ def start_win():
 
     btn = Button(root, text="Submit", fg="black", command=clicked, borderwidth=2, relief="solid")
     btn.pack(side=TOP, padx=10, pady=10)
-
 
 # ADD COURSE BUTTON
 def add(xx, yy):
@@ -104,11 +117,10 @@ def add(xx, yy):
     btn = Button(popup, text="Add", fg="black", command=lambda: added(xx, yy, code.get(), title.get(), cred.get(), variable.get()), borderwidth=2, relief="solid")
     btn.pack(side=BOTTOM, pady=50)
 
-
 # COURSE ADDED BUTTON
-def added(xx, yy, co, ti, cr, gr):
+def added(xx, yy, co, ti, cr, gr, se, ye):
 
-    courses.append(Course(co, ti, cr, gr))
+    courses.append(Course(co, ti, cr, gr, se, ye))
 
     frame = Frame(root, borderwidth=3, relief="raised", width=180, height=70, bg="lightgrey")
     frame.place(x=xx+10, y=yy)
@@ -131,6 +143,7 @@ def added(xx, yy, co, ti, cr, gr):
 
     popup.destroy()
 
+# SAVE AS METHOD
 def save_as():
     file_path = filedialog.asksaveasfilename(
     title="Save As",
@@ -143,18 +156,21 @@ def save_as():
         print(f"File will be saved at: {file_path}")
         # Save file operation
         with open(file_path, 'w') as file:
+            file.write(startsem+" "+str(year)+"\n")
             for c in courses:
                 file.write("^*^\n")
                 file.write(c.code+"\n")
                 file.write(c.title+"\n")
                 file.write(c.credits+"\n")
                 file.write(c.grade+"\n")
+                file.write(c.sem+"\n")
+                file.write(c.year+"\n")
     root.focus_force()
 
 #
 # COURSE PAGE BUILD
 #
-def course_page(year):
+def course_page(year, sem):
 
     canvas = Canvas(root)
     canvas.pack(side=LEFT, fill=BOTH, expand=True)
@@ -164,7 +180,7 @@ def course_page(year):
     
     canvas.configure(xscrollcommand=scrollbar.set)
 
-    st = str(variable.get()) +" "+str(year)
+    st = str(sem) +" "+str(year)
     clear_window()
     i = 11
     j = 0
@@ -211,6 +227,7 @@ root.config(menu=menu)
 
 #Array of courses
 global courses
+courses = []
 
 
 start_win()
@@ -219,9 +236,3 @@ root.focus_force()
 
 root.mainloop()
 
-class Course:
-    def __init__(self, co, ti, cr, gr):
-        self.code = co
-        self.title = ti
-        self.credits = cr
-        self.grade = gr
