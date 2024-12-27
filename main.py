@@ -192,6 +192,8 @@ def open_file():
             cGr = "A"
             cSe = "Fall"
             cYr = 0
+            global startsem
+            startsem = sSem
             for line in file:
                 match l:
                     case 0:
@@ -238,25 +240,27 @@ def open_file():
                             ("Summer", "Summer"): 0
                         }
 
+                        year_offset = 210+225+240
+
                         match sSem:
                             case "Spring":
-                                curx=semester_offsets.get((sSem, cSe) , 0)
+                                curx=semester_offsets.get((sSem, cSe) , 0)+((cYr-sYr) *year_offset)
                             case "Summer":
-                                match cSem:
+                                match cSe:
                                     case "Summer":
-                                        curx=semester_offsets.get((sSem, cSe) , 0)*(cYr-sYr)
+                                        curx=semester_offsets.get((sSem, cSe) , 0)+(cYr-sYr)*year_offset
                                     case "Fall":
-                                        curx=semester_offsets.get((sSem, cSe) , 0)*(cYr-sYr)
+                                        curx=semester_offsets.get((sSem, cSe) , 0)+((cYr-sYr)*year_offset)
                                     case "Spring":
-                                        curx=semester_offsets.get((sSem, cSe) , 0)*(cYr-sYr)
+                                        curx=semester_offsets.get((sSem, cSe) , 0)+(((cYr-sYr)-1)*year_offset)
                             case "Fall":
                                 match cSe:
                                     case "Summer":
-                                        curx=semester_offsets.get((sSem, cSe) , 0)*(cYr-sYr)
+                                        curx=semester_offsets.get((sSem, cSe) , 0)+((cYr-sYr)-1)*year_offset
                                     case "Fall":
-                                        curx=semester_offsets.get((sSem, cSe) , 0)*(cYr-sYr)
+                                        curx=semester_offsets.get((sSem, cSe) , 0)+(cYr-sYr)*year_offset
                                     case "Spring":
-                                        curx=semester_offsets.get((sSem, cSe) , 0)*(cYr-sYr)
+                                        curx=semester_offsets.get((sSem, cSe) , 0)+((cYr-sYr)-1)*year_offset
 
                         added(curx, cury, cCo, cTi, cCr, cGr, cSe, cYr)
                         l = 1  # Reset line count after processing the course
