@@ -19,26 +19,19 @@ def clear_window():
             continue
         widget.destroy()
 
-# MISC METHOD
-def make_draggable(widget):
-    widget.bind("<Button-1>", on_drag_start)
-    widget.bind("<B1-Motion>", on_drag_motion)
-
-# MISC METHOD
-def on_drag_start(event):
+def drag_start(event):
     widget = event.widget
     widget._drag_start_x = event.x
     widget._drag_start_y = event.y
 
-# MISC METHOD
-def on_drag_motion(event):
+def drag_motion(event):
     widget = event.widget
     x = widget.winfo_x() - widget._drag_start_x + event.x
     y = widget.winfo_y() - widget._drag_start_y + event.y
     widget.place(x=x, y=y)
 
 # SUBMIT BUTTON ON MAIN PAGE METHOD
-def clicked():
+def start_coursepage():
     global startyear
     global startsem
     startsem = "Fall"
@@ -73,7 +66,7 @@ def start_win():
     drp = OptionMenu(root, variable, *sems)
     drp.pack(side=TOP, padx=10, pady=10)
 
-    btn = Button(root, text="Submit", fg="black", command=clicked, borderwidth=2, relief="solid")
+    btn = Button(root, text="Submit", fg="black", command=start_coursepage, borderwidth=2, relief="solid")
     btn.pack(side=TOP, padx=10, pady=10)
 
 # ADD COURSE BUTTON
@@ -150,6 +143,8 @@ def added(xx, yy, co, ti, cr, gr, se, ye):
     remov.create_text(9, 9, text="X", fill="red", font=("Helvetica", 15, "bold"), anchor="center")
     remov.bind("<Button-1>", lambda event: remove_confirm(frame, code.cget("text"), title.cget("text"), btn))
 
+    frame.bind("<Button-1>", drag_start)
+    frame.bind("<B1-Motion>", drag_motion)
     if yy < 600:  # Limit vertical placement
         btn.place(x=xx + 70, y=yy + 100)
 
