@@ -35,9 +35,9 @@ def start_coursepage():
     global startyear
     global startsem
     startsem = "Fall"
-    year = 0
+    startyear = 0
     try:
-        year = int(txt.get())
+        startyear = int(txt.get())
         startsem = variable.get()
         course_page(startyear, startsem)
     except ValueError:
@@ -108,15 +108,15 @@ def add(xx, yy, sem ,yer):
     cred = Entry(popup, width=5, borderwidth=2, relief="solid")
     cred.place(x=100, y=100)
 
-    btn = Button(popup, text="Add", fg="black", command=lambda: added(xx, yy, code.get(), title.get(), cred.get(), variable.get(), sem, yer), borderwidth=2, relief="solid")
+    btn = Button(popup, text="Add", fg="black", command=lambda: (added(xx, yy, code.get(), title.get(), cred.get(), variable.get(), sem, yer)), borderwidth=2, relief="solid")
     btn.pack(side=BOTTOM, pady=50)
+    button_references.append(btn)
 
 # COURSE ADDED BUTTON
 def added(xx, yy, co, ti, cr, gr, se, ye):
 
     # Add course object to the list
     courses.append(Course(co, ti, cr, gr, se, ye))
-
     # Create the course frame
     frame = Frame(root, borderwidth=3, relief="raised", width=180, height=70, bg="lightgrey")
     frame.place(x=xx + 10, y=yy)
@@ -134,10 +134,19 @@ def added(xx, yy, co, ti, cr, gr, se, ye):
     grade = Label(frame, text=gr, fg="black", font=("Helvetica", 12, "bold"), bg="lightgrey")
     grade.place(x=150, y=5)
 
-
+    for b in button_references:
+        try:
+            print("xx = "+str(xx))
+            print("\nbutton x: "+str(b.winfo_x()))
+            if b.winfo_x()==70+xx:
+                b.destroy()
+        except TclError:
+            pass
     btn = Button(root, text="+", fg="black", 
-                     command=lambda: add(xx, yy + 75, se, ye), borderwidth=2, relief="solid")
-    
+                     command=lambda: (add(xx, yy + 70, se, ye)), borderwidth=2, relief="solid")
+
+    button_references.append(btn)
+
     remov = Canvas(frame, width=14, height=15, bg="white", highlightthickness=2)
     remov.place(x=151, y=23)
     remov.create_text(9, 9, text="X", fill="red", font=("Helvetica", 15, "bold"), anchor="center")
@@ -190,8 +199,6 @@ def remove(f, c ,t, b):
             courses.pop(i)
             break
         i += 1
-    f.destroy()
-    b.destroy()
     clear_window()
     course_page(startyear, startsem)
     temp = copy.deepcopy(courses)
@@ -226,7 +233,7 @@ def remove(f, c ,t, b):
                     case "Spring":
                         curx=semester_offsets.get((sSem, cSe) , 0)+((cYr-sYr)-1)*year_offset
         existing_courses = [c for c in courses if c.sem == cSe and c.year == cYr]
-        cury = 30 + len(existing_courses) * 75
+        cury = 25 + len(existing_courses) * 70
         added(curx, cury, cCo, cTi, cCr, cGr, cSe, cYr)
 
 # SAVE METHOD
@@ -284,7 +291,7 @@ def open_file():
             clear_window()
             root.title("Ben's Course Planner ("+file.name+")")
             curx = 0
-            cury = 30
+            cury = 25
             l = 0
             sSem = "Fall"
             sYr = 0
@@ -329,22 +336,7 @@ def open_file():
 
                         # Adjust curx based on semester and year
                         curx = 0
-                        cury = 30  # Fixed y position
-                        global semester_offsets
-                        semester_offsets = {
-                            ("Fall", "Fall"): 0,
-                            ("Fall", "Spring"): 210,
-                            ("Fall", "Summer"): 210 + 225,
-                            ("Spring", "Fall"): 225 + 240,
-                            ("Spring", "Spring"): 0,
-                            ("Spring", "Summer"): 225,
-                            ("Summer", "Fall"): 240,
-                            ("Summer", "Spring"): 240 + 210,
-                            ("Summer", "Summer"): 0
-                        }
-
-                        global year_offset
-                        year_offset = 210+225+240
+                        cury = 25  # Fixed y position
 
                         match sSem:
                             case "Spring":
@@ -367,7 +359,7 @@ def open_file():
                                         curx=semester_offsets.get((sSem, cSe) , 0)+((cYr-sYr)-1)*year_offset
 
                         existing_courses = [c for c in courses if c.sem == cSe and c.year == cYr]
-                        cury = 30 + len(existing_courses) * 75
+                        cury = 25 + len(existing_courses) * 70
                         added(curx, cury, cCo, cTi, cCr, cGr, cSe, cYr)
                         l = 1  # Reset line count after processing the course
 
@@ -390,8 +382,9 @@ def course_page(year, sem):
         frame = Frame(root, borderwidth=5, relief="sunken", width=200, height=750)
         frame.place(x=j, y=20)
 
-        btn = Button(root, text="+", fg="black", command=lambda x=j, s=cur, y=year: add(x, 30, s, y), borderwidth=2, relief="solid")
-        btn.place(x=j+70, y=30)
+        btn = Button(root, text="+", fg="black", command=lambda x=j, s=cur, y=year: add(x, 25, s, y), borderwidth=2, relief="solid")
+        btn.place(x=j+70, y=25)
+        button_references.append(btn)   
 
 
         if(cur == "Fall"):
@@ -409,6 +402,7 @@ def course_page(year, sem):
 #
 # WINDOW SETUP
 #
+
 global root
 root = Tk()
 root.title("Ben's Course Planner")
@@ -427,10 +421,28 @@ item.add_command(label='Open', command=open_file)
 menu.add_cascade(label='File', menu=item)
 root.config(menu=menu)
 
-#Array of courses
+# BIG GLOBALS
 global courses
 courses = []
 
+global button_references
+button_references = []
+
+global semester_offsets
+semester_offsets = {
+                            ("Fall", "Fall"): 0,
+                            ("Fall", "Spring"): 210,
+                            ("Fall", "Summer"): 210 + 225,
+                            ("Spring", "Fall"): 225 + 240,
+                            ("Spring", "Spring"): 0,
+                            ("Spring", "Summer"): 225,
+                            ("Summer", "Fall"): 240,
+                            ("Summer", "Spring"): 240 + 210,
+                            ("Summer", "Summer"): 0
+                        }
+
+global year_offset
+year_offset = 210+225+240
 
 start_win()
 root.lift()
