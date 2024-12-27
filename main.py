@@ -159,6 +159,7 @@ def added(xx, yy, co, ti, cr, gr, se, ye):
     except NameError:
         pass
 
+# REMOVE POPUP CONFIRMATION
 def remove_confirm(f, c, t, b):
     global confirm
 
@@ -181,7 +182,7 @@ def remove_confirm(f, c, t, b):
     confirm.lift()
     confirm.focus_force()
 
-
+# REMOVE AND REFRESH
 def remove(f, c ,t, b):
     confirm.destroy()
     i = 0
@@ -233,9 +234,23 @@ def remove(f, c ,t, b):
         cury = 30 + len(existing_courses) * 75
         added(curx, cury, cCo, cTi, cCr, cGr, cSe, cYr)
 
+# SAVE METHOD
+def save():
+    with open(file_path, 'w') as file:
+        root.title("Ben's Course Planner ("+file.name+")")
+        file.write(startsem+" "+str(startyear)+"\n")
+        for c in courses:
+            file.write("code="+c.code+"\n")
+            file.write("title="+c.title+"\n")
+            file.write("credits="+c.credits+"\n")
+            file.write("grade="+c.grade+"\n")
+            file.write("semester="+c.sem+"\n")
+            file.write("year="+str(c.year)+"\n")
 
 # SAVE AS METHOD
 def save_as():
+    global file_path
+    item.entryconfig('Save', state="normal")
     file_path = filedialog.asksaveasfilename(
     title="Save As",
     defaultextension=".txt",  # Set default file extension
@@ -244,6 +259,7 @@ def save_as():
 
 # Check if a file path was selected
     if file_path:
+
         # Save file operation
         with open(file_path, 'w') as file:
             root.title("Ben's Course Planner ("+file.name+")")
@@ -257,7 +273,10 @@ def save_as():
                 file.write("year="+str(c.year)+"\n")
     root.focus_force()
 
+# OPEN FILE METHOD
 def open_file():
+    global file_path
+    item.entryconfig('Save', state="normal")
     file_path = filedialog.askopenfilename(
         title="Open",
         defaultextension=".txt",  # Set default file extension
@@ -359,7 +378,6 @@ def open_file():
 
     root.focus_force()
 
-
 #
 # COURSE PAGE BUILD
 #
@@ -408,6 +426,7 @@ menu = Menu(root)
 global item
 item = Menu(menu, tearoff=0) 
 item.add_command(label='New', command=start_win)
+item.add_command(label='Save', command=save, state="disabled")
 item.add_command(label='Save as', command=save_as)
 item.add_command(label='Open', command=open_file)
 menu.add_cascade(label='File', menu=item)
