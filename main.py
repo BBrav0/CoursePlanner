@@ -184,25 +184,32 @@ def remove_confirm(f, c, t, b):
 def remove(f, c ,t, b):
     confirm.destroy()
     i = 0
+    seme = ""
+    yea = 0
     while i < len(courses):
         if courses[i].code == c and courses[i].title == t:
+            seme = courses[i].sem
+            yea = courses[i].year
             courses.pop(i)
             break
         i += 1
     f.destroy()
     b.destroy()
 
+
 # SAVE AS METHOD
 def save_as():
     file_path = filedialog.asksaveasfilename(
     title="Save As",
     defaultextension=".txt",  # Set default file extension
-    filetypes=[("Text Files", "*.txt"), ("All Files", "*.*")],  # File type filters
+    filetypes=[("Text Files", "*.txt")],  # File type filters
     )
+
 # Check if a file path was selected
     if file_path:
         # Save file operation
         with open(file_path, 'w') as file:
+            root.title("Ben's Course Planner ("+file.name+")")
             file.write(startsem+" "+str(year)+"\n")
             for c in courses:
                 file.write("code="+c.code+"\n")
@@ -217,11 +224,16 @@ def open_file():
     file_path = filedialog.askopenfilename(
         title="Open",
         defaultextension=".txt",  # Set default file extension
-        filetypes=[("Text Files", "*.txt"), ("All Files", "*.*")],  # File type filters
+        filetypes=[("Text Files", "*.txt")],  # File type filters
     )
 
     if file_path:
         with open(file_path, "r") as file:
+            courses.clear()
+            clear_window()
+            root.title("Ben's Course Planner ("+file.name+")")
+            curx = 0
+            cury = 30
             l = 0
             sSem = "Fall"
             sYr = 0
@@ -301,9 +313,8 @@ def open_file():
                                     case "Spring":
                                         curx=semester_offsets.get((sSem, cSe) , 0)+((cYr-sYr)-1)*year_offset
 
-                        for c in courses:
-                            if (c.sem == cSe and cYr == c.year):
-                                cury+=75
+                        existing_courses = [c for c in courses if c.sem == cSe and c.year == cYr]
+                        cury = 30 + len(existing_courses) * 75
                         added(curx, cury, cCo, cTi, cCr, cGr, cSe, cYr)
                         l = 1  # Reset line count after processing the course
 
