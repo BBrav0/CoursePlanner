@@ -119,6 +119,7 @@ def add(xx, yy, sem ,yer):
 
 # COURSE ADDED BUTTON
 def added(xx, yy, co, ti, cr, gr, se, ye):
+
     # Add course object to the list
     courses.append(Course(co, ti, cr, gr, se, ye))
 
@@ -130,7 +131,7 @@ def added(xx, yy, co, ti, cr, gr, se, ye):
     code = Label(frame, text=co, fg="black", font=("Helvetica", 12, "bold"), bg="lightgrey")
     code.place(x=5, y=5)
 
-    title = Label(frame, text=ti, fg="black", font=("Helvetica", 14), bg="lightgrey", wraplength=160)
+    title = Label(frame, text=ti, fg="black", font=("Helvetica", 14), bg="lightgrey", wraplength=150)
     title.place(x=5, y=20)
 
     credits = Label(frame, text=f"{cr} credits", fg="black", font=("Helvetica", 12, "bold"), bg="lightgrey")
@@ -139,10 +140,16 @@ def added(xx, yy, co, ti, cr, gr, se, ye):
     grade = Label(frame, text=gr, fg="black", font=("Helvetica", 12, "bold"), bg="lightgrey")
     grade.place(x=150, y=5)
 
-    # Add button for additional courses
-    if yy < 600:  # Limit vertical placement
-        btn = Button(root, text="+", fg="black", 
+
+    btn = Button(root, text="+", fg="black", 
                      command=lambda: add(xx, yy + 75, se, ye), borderwidth=2, relief="solid")
+    
+    remov = Canvas(frame, width=14, height=15, bg="white", highlightthickness=2)
+    remov.place(x=151, y=23)
+    remov.create_text(9, 9, text="X", fill="red", font=("Helvetica", 15, "bold"), anchor="center")
+    remov.bind("<Button-1>", lambda event: remove_confirm(frame, code.cget("text"), title.cget("text"), btn))
+
+    if yy < 600:  # Limit vertical placement
         btn.place(x=xx + 70, y=yy + 100)
 
     # Close the popup window if it exists
@@ -151,6 +158,39 @@ def added(xx, yy, co, ti, cr, gr, se, ye):
     except NameError:
         pass
 
+def remove_confirm(f, c, t, b):
+    global confirm
+
+    confirm = Toplevel(root)
+    confirm.title("Remove Course")
+    confirm.geometry('400x200')
+
+    nex = Label(confirm, text="Remove Course?",font=("Helvetica", 20, "bold"), borderwidth=0, relief="solid",fg="red")
+    nex.pack(side=TOP, pady=10)
+
+    nex = Label(confirm, text=c,font=("Helvetica", 14, "bold"), borderwidth=0, relief="solid",fg="black")
+    nex.pack(side=TOP, pady=10)
+
+    nex = Label(confirm, text=t,font=("Helvetica", 15), borderwidth=0, relief="solid",fg="black")
+    nex.pack(side=TOP, pady=10)
+
+    btn = Button(confirm, text="OK", command=lambda: remove(f, c, t, b), borderwidth=2, relief="solid")
+    btn.pack(side=TOP, pady=10)
+
+    confirm.lift()
+    confirm.focus_force()
+
+
+def remove(f, c ,t, b):
+    confirm.destroy()
+    i = 0
+    while i < len(courses):
+        if courses[i].code == c and courses[i].title == t:
+            courses.pop(i)
+            break
+        i += 1
+    f.destroy()
+    b.destroy()
 
 # SAVE AS METHOD
 def save_as():
@@ -159,7 +199,6 @@ def save_as():
     defaultextension=".txt",  # Set default file extension
     filetypes=[("Text Files", "*.txt"), ("All Files", "*.*")],  # File type filters
     )
-
 # Check if a file path was selected
     if file_path:
         # Save file operation
@@ -193,13 +232,15 @@ def open_file():
             cSe = "Fall"
             cYr = 0
             global startsem
-            startsem = sSem
+            global year
             for line in file:
                 match l:
                     case 0:
                         cur = line.split()
                         sYr = int(cur[1])
                         sSem = cur[0]
+                        year = sYr
+                        startsem = sSem
                         course_page(sYr, sSem)
                         l += 1
                     case 1:
@@ -226,8 +267,6 @@ def open_file():
                         # Adjust curx based on semester and year
                         curx = 0
                         cury = 30  # Fixed y position
-
-                        # Adjust for semester differences (Fall, Spring, Summer)
                         semester_offsets = {
                             ("Fall", "Fall"): 0,
                             ("Fall", "Spring"): 210,
@@ -307,6 +346,7 @@ def course_page(year, sem):
 #
 # WINDOW SETUP
 #
+global root
 root = Tk()
 root.title("Ben's Course Planner")
 root.geometry('1920x1080')  
