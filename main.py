@@ -130,7 +130,7 @@ def added(xx, yy, co, ti, cr, gr, se, ye):
     code = Label(frame, text=co, fg="black", font=("Helvetica", 12, "bold"), bg="lightgrey")
     code.place(x=5, y=5)
 
-    title = Label(frame, text=ti, fg="black", font=("Helvetica", 14), bg="lightgrey", wraplength=170)
+    title = Label(frame, text=ti, fg="black", font=("Helvetica", 14), bg="lightgrey", wraplength=160)
     title.place(x=5, y=20)
 
     credits = Label(frame, text=f"{cr} credits", fg="black", font=("Helvetica", 12, "bold"), bg="lightgrey")
@@ -262,6 +262,9 @@ def open_file():
                                     case "Spring":
                                         curx=semester_offsets.get((sSem, cSe) , 0)+((cYr-sYr)-1)*year_offset
 
+                        for c in courses:
+                            if (c.sem == cSe and cYr == c.year):
+                                cury+=75
                         added(curx, cury, cCo, cTi, cCr, cGr, cSe, cYr)
                         l = 1  # Reset line count after processing the course
 
@@ -312,6 +315,7 @@ root.rowconfigure(0, weight=1)
 root.columnconfigure(0, weight=1)
 
 menu = Menu(root)
+global item
 item = Menu(menu, tearoff=0) 
 item.add_command(label='New', command=start_win)
 item.add_command(label='Save as', command=save_as)
