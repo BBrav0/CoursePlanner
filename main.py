@@ -1,6 +1,7 @@
 from tkinter import *
 from tkinter import ttk
 from tkinter import filedialog
+import copy
 
 class Course:
     def __init__(self, co, ti, cr, gr, se, ye):
@@ -38,14 +39,14 @@ def on_drag_motion(event):
 
 # SUBMIT BUTTON ON MAIN PAGE METHOD
 def clicked():
-    global year
+    global startyear
     global startsem
     startsem = "Fall"
     year = 0
     try:
         year = int(txt.get())
         startsem = variable.get()
-        course_page(year, startsem)
+        course_page(startyear, startsem)
     except ValueError:
         lbl.configure(text="Incorrect input. Please try again")
 
@@ -195,6 +196,42 @@ def remove(f, c ,t, b):
         i += 1
     f.destroy()
     b.destroy()
+    clear_window()
+    course_page(startyear, startsem)
+    temp = copy.deepcopy(courses)
+    courses.clear()
+    for cur in temp:
+        sSem = startsem
+        cSe = cur.sem
+        cYr = cur.year
+        sYr=startyear
+        cCo = cur.code
+        cTi = cur.title
+        cCr = cur.credits
+        cGr = cur.grade
+
+        match startsem:
+            case "Spring":
+                curx=semester_offsets.get((sSem, cSe) , 0)+((cYr-sYr) *year_offset)
+            case "Summer":
+                match cSe:
+                    case "Summer":
+                        curx=semester_offsets.get((sSem, cSe) , 0)+(cYr-sYr)*year_offset
+                    case "Fall":
+                        curx=semester_offsets.get((sSem, cSe) , 0)+((cYr-sYr)*year_offset)
+                    case "Spring":
+                        curx=semester_offsets.get((sSem, cSe) , 0)+(((cYr-sYr)-1)*year_offset)
+            case "Fall":
+                match cSe:
+                    case "Summer":
+                        curx=semester_offsets.get((sSem, cSe) , 0)+((cYr-sYr)-1)*year_offset
+                    case "Fall":
+                        curx=semester_offsets.get((sSem, cSe) , 0)+(cYr-sYr)*year_offset
+                    case "Spring":
+                        curx=semester_offsets.get((sSem, cSe) , 0)+((cYr-sYr)-1)*year_offset
+        existing_courses = [c for c in courses if c.sem == cSe and c.year == cYr]
+        cury = 30 + len(existing_courses) * 75
+        added(curx, cury, cCo, cTi, cCr, cGr, cSe, cYr)
 
 
 # SAVE AS METHOD
@@ -210,7 +247,7 @@ def save_as():
         # Save file operation
         with open(file_path, 'w') as file:
             root.title("Ben's Course Planner ("+file.name+")")
-            file.write(startsem+" "+str(year)+"\n")
+            file.write(startsem+" "+str(startyear)+"\n")
             for c in courses:
                 file.write("code="+c.code+"\n")
                 file.write("title="+c.title+"\n")
@@ -244,14 +281,14 @@ def open_file():
             cSe = "Fall"
             cYr = 0
             global startsem
-            global year
+            global startyear
             for line in file:
                 match l:
                     case 0:
                         cur = line.split()
                         sYr = int(cur[1])
                         sSem = cur[0]
-                        year = sYr
+                        startyear = sYr
                         startsem = sSem
                         course_page(sYr, sSem)
                         l += 1
@@ -279,6 +316,7 @@ def open_file():
                         # Adjust curx based on semester and year
                         curx = 0
                         cury = 30  # Fixed y position
+                        global semester_offsets
                         semester_offsets = {
                             ("Fall", "Fall"): 0,
                             ("Fall", "Spring"): 210,
@@ -291,6 +329,7 @@ def open_file():
                             ("Summer", "Summer"): 0
                         }
 
+                        global year_offset
                         year_offset = 210+225+240
 
                         match sSem:
