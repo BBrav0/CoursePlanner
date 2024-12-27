@@ -38,6 +38,8 @@ def drag_stop(event):
     widget = event.widget
     x = widget.winfo_x()  # Final x position
     y = widget.winfo_y()  # Final y position
+    refresh()
+    mark_unsaved()
 
 # SUBMIT BUTTON ON MAIN PAGE METHOD
 def start_coursepage():
@@ -48,6 +50,8 @@ def start_coursepage():
     try:
         startyear = int(txt.get())
         startsem = variable.get()
+        root.title("Ben's Course Planner (Not Saved)")
+        mark_unsaved()
         course_page(startyear, startsem)
     except ValueError:
         lbl.configure(text="Incorrect input. Please try again")
@@ -117,7 +121,7 @@ def add(xx, yy, sem ,yer):
     cred = Entry(popup, width=5, borderwidth=2, relief="solid")
     cred.place(x=100, y=100)
 
-    btn = Button(popup, text="Add", fg="black", command=lambda: (added(xx, yy, code.get(), title.get(), cred.get(), variable.get(), sem, yer)), borderwidth=2, relief="solid")
+    btn = Button(popup, text="Add", fg="black", command=lambda: (mark_unsaved(), added(xx, yy, code.get(), title.get(), cred.get(), variable.get(), sem, yer)), borderwidth=2, relief="solid")
     btn.pack(side=BOTTOM, pady=50)
     button_references.append(btn)
 
@@ -168,7 +172,6 @@ def added(xx, yy, co, ti, cr, gr, se, ye):
         btn.place(x=xx + 70, y=yy + 100)
 
     button_references.append(btn)
-    
     try:
         popup.destroy()
     except NameError:
@@ -197,12 +200,18 @@ def remove_confirm(f, c, t, b):
     confirm.lift()
     confirm.focus_force()
 
+# MARK UNSAVED
+def mark_unsaved():
+    if not (root.wm_title()[-1] == "*"):
+        root.title(root.wm_title()+"*")
+
 # REMOVE
 def remove(f, c ,t, b):
     confirm.destroy()
     i = 0
     seme = ""
     yea = 0
+    mark_unsaved()
     while i < len(courses):
         if courses[i].code == c and courses[i].title == t:
             seme = courses[i].sem
@@ -211,7 +220,6 @@ def remove(f, c ,t, b):
             break
         i += 1
     refresh()
-
     
 def refresh():
     clear_window()
