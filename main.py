@@ -19,16 +19,25 @@ def clear_window():
             continue
         widget.destroy()
 
+# START DRAGGING
 def drag_start(event):
     widget = event.widget
+    widget.lift()
     widget._drag_start_x = event.x
     widget._drag_start_y = event.y
 
+# WHILE DRAGGING
 def drag_motion(event):
     widget = event.widget
     x = widget.winfo_x() - widget._drag_start_x + event.x
     y = widget.winfo_y() - widget._drag_start_y + event.y
     widget.place(x=x, y=y)
+
+# DONE DRAGGING
+def drag_stop(event):
+    widget = event.widget
+    x = widget.winfo_x()  # Final x position
+    y = widget.winfo_y()  # Final y position
 
 # SUBMIT BUTTON ON MAIN PAGE METHOD
 def start_coursepage():
@@ -134,10 +143,9 @@ def added(xx, yy, co, ti, cr, gr, se, ye):
     grade = Label(frame, text=gr, fg="black", font=("Helvetica", 12, "bold"), bg="lightgrey")
     grade.place(x=150, y=5)
 
+    root.update_idletasks()
     for b in button_references:
         try:
-            print("xx = "+str(xx))
-            print("\nbutton x: "+str(b.winfo_x()))
             if b.winfo_x()==70+xx:
                 b.destroy()
         except TclError:
@@ -145,7 +153,7 @@ def added(xx, yy, co, ti, cr, gr, se, ye):
     btn = Button(root, text="+", fg="black", 
                      command=lambda: (add(xx, yy + 70, se, ye)), borderwidth=2, relief="solid")
 
-    button_references.append(btn)
+    
 
     remov = Canvas(frame, width=14, height=15, bg="white", highlightthickness=2)
     remov.place(x=151, y=23)
@@ -154,10 +162,13 @@ def added(xx, yy, co, ti, cr, gr, se, ye):
 
     frame.bind("<Button-1>", drag_start)
     frame.bind("<B1-Motion>", drag_motion)
-    if yy < 600:  # Limit vertical placement
+    frame.bind("<ButtonRelease-1>", drag_stop)
+    frame_references.append(frame)
+    if yy < 600: 
         btn.place(x=xx + 70, y=yy + 100)
 
-    # Close the popup window if it exists
+    button_references.append(btn)
+    
     try:
         popup.destroy()
     except NameError:
@@ -186,7 +197,7 @@ def remove_confirm(f, c, t, b):
     confirm.lift()
     confirm.focus_force()
 
-# REMOVE AND REFRESH
+# REMOVE
 def remove(f, c ,t, b):
     confirm.destroy()
     i = 0
@@ -199,10 +210,15 @@ def remove(f, c ,t, b):
             courses.pop(i)
             break
         i += 1
+    refresh()
+
+    
+def refresh():
     clear_window()
     course_page(startyear, startsem)
     temp = copy.deepcopy(courses)
     courses.clear()
+    frame_references.clear()
     for cur in temp:
         sSem = startsem
         cSe = cur.sem
@@ -233,7 +249,7 @@ def remove(f, c ,t, b):
                     case "Spring":
                         curx=semester_offsets.get((sSem, cSe) , 0)+((cYr-sYr)-1)*year_offset
         existing_courses = [c for c in courses if c.sem == cSe and c.year == cYr]
-        cury = 25 + len(existing_courses) * 70
+        cury = 30 + len(existing_courses) * 70
         added(curx, cury, cCo, cTi, cCr, cGr, cSe, cYr)
 
 # SAVE METHOD
@@ -291,7 +307,7 @@ def open_file():
             clear_window()
             root.title("Ben's Course Planner ("+file.name+")")
             curx = 0
-            cury = 25
+            cury = 30
             l = 0
             sSem = "Fall"
             sYr = 0
@@ -336,7 +352,7 @@ def open_file():
 
                         # Adjust curx based on semester and year
                         curx = 0
-                        cury = 25  # Fixed y position
+                        cury = 30  # Fixed y position
 
                         match sSem:
                             case "Spring":
@@ -359,7 +375,7 @@ def open_file():
                                         curx=semester_offsets.get((sSem, cSe) , 0)+((cYr-sYr)-1)*year_offset
 
                         existing_courses = [c for c in courses if c.sem == cSe and c.year == cYr]
-                        cury = 25 + len(existing_courses) * 70
+                        cury =30 + len(existing_courses) * 70
                         added(curx, cury, cCo, cTi, cCr, cGr, cSe, cYr)
                         l = 1  # Reset line count after processing the course
 
@@ -382,8 +398,8 @@ def course_page(year, sem):
         frame = Frame(root, borderwidth=5, relief="sunken", width=200, height=750)
         frame.place(x=j, y=20)
 
-        btn = Button(root, text="+", fg="black", command=lambda x=j, s=cur, y=year: add(x, 25, s, y), borderwidth=2, relief="solid")
-        btn.place(x=j+70, y=25)
+        btn = Button(root, text="+", fg="black", command=lambda x=j, s=cur, y=year: add(x, 30, s, y), borderwidth=2, relief="solid")
+        btn.place(x=j+70, y=30)
         button_references.append(btn)   
 
 
@@ -428,17 +444,20 @@ courses = []
 global button_references
 button_references = []
 
+global frame_references
+frame_references = []
+
 global semester_offsets
 semester_offsets = {
-                            ("Fall", "Fall"): 0,
-                            ("Fall", "Spring"): 210,
-                            ("Fall", "Summer"): 210 + 225,
-                            ("Spring", "Fall"): 225 + 240,
-                            ("Spring", "Spring"): 0,
-                            ("Spring", "Summer"): 225,
-                            ("Summer", "Fall"): 240,
-                            ("Summer", "Spring"): 240 + 210,
-                            ("Summer", "Summer"): 0
+    ("Fall", "Fall"): 0,
+     ("Fall", "Spring"): 210,
+     ("Fall", "Summer"): 210 + 225,
+     ("Spring", "Fall"): 225 + 240,
+  ("Spring", "Spring"): 0,
+    ("Spring", "Summer"): 225,
+     ("Summer", "Fall"): 240,
+     ("Summer", "Spring"): 240 + 210,
+    ("Summer", "Summer"): 0
                         }
 
 global year_offset
