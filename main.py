@@ -19,12 +19,22 @@ def clear_window():
             continue
         widget.destroy()
 
+# START DRAG INFO
+def drag_start_info(cod, tit):
+    global dragged_code
+    dragged_code = cod
+    global dragged_title
+    dragged_title = tit
+
 # START DRAGGING
-def drag_start(event):
+def drag_start(event, cod, tit):
+    drag_start_info(cod, tit)
     widget = event.widget
     widget.lift()
+    global drag_start_x
     widget._drag_start_x = event.x
     widget._drag_start_y = event.y
+    drag_start_x = widget.winfo_x()
 
 # WHILE DRAGGING
 def drag_motion(event):
@@ -38,8 +48,61 @@ def drag_stop(event):
     widget = event.widget
     x = widget.winfo_x()  # Final x position
     y = widget.winfo_y()  # Final y position
+    x_offset = x-drag_start_x
+    if (x_offset > 150 or x_offset < -150):
+        mark_unsaved()
+        i = int(x_offset/190)
+        j = 0
+        cours = Course(0,0,0,0,0,0)
+        for c in courses:
+            if c.code == dragged_code and c.title == dragged_title:
+                cours = Course(c.code, c.title, c.credits, c.grade, c.sem, c.year)
+                courses.remove(c)
+                break
+        if i>0:
+            while not (j==i):
+                temp = forward_one(cours.sem, cours.year)
+                cours.sem = temp[0]
+                cours.year = int(temp[1])
+                j+=1
+        elif i<0:
+            while not (j==i):
+                temp = back_one(cours.sem, cours.year)
+                cours.sem = temp[0]
+                cours.year = int(temp[1])
+                j-=1
+        courses.append(cours)
     refresh()
-    mark_unsaved()
+    
+    #THRESHOLD SHOULD BE +150 X OR -150 X
+
+# BACK ONE SEMESTER HELPER METHOD
+def back_one(sem, year):
+    n_sem = ""
+    year = int(year)
+    match sem:
+        case "Fall":
+            n_sem = "Summer"
+        case "Summer":
+            n_sem = "Spring"
+        case "Spring":
+            n_sem = "Fall"
+            year-=1
+    return [n_sem, str(year)]
+
+# FORWARD ONE SEMESTER HELPER METHOD
+def forward_one(sem, year):
+    n_sem = ""
+    year = int(year)
+    match sem:
+        case "Fall":
+            n_sem = "Spring"
+            year+=1
+        case "Summer":
+            n_sem = "Fall"
+        case "Spring":
+            n_sem = "Summer"
+    return [n_sem, str(year)]
 
 # SUBMIT BUTTON ON MAIN PAGE METHOD
 def start_coursepage():
@@ -162,9 +225,9 @@ def added(xx, yy, co, ti, cr, gr, se, ye):
     remov = Canvas(frame, width=14, height=15, bg="white", highlightthickness=2)
     remov.place(x=151, y=23)
     remov.create_text(9, 9, text="X", fill="red", font=("Helvetica", 15, "bold"), anchor="center")
-    remov.bind("<Button-1>", lambda event: remove_confirm(frame, code.cget("text"), title.cget("text"), btn))
+    remov.bind("<Button-1>", lambda event: remove_confirm(code.cget("text"), title.cget("text")))
 
-    frame.bind("<Button-1>", drag_start)
+    frame.bind("<Button-1>", lambda event: drag_start(event, co, ti))
     frame.bind("<B1-Motion>", drag_motion)
     frame.bind("<ButtonRelease-1>", drag_stop)
     frame_references.append(frame)
@@ -178,7 +241,7 @@ def added(xx, yy, co, ti, cr, gr, se, ye):
         pass
 
 # REMOVE POPUP CONFIRMATION
-def remove_confirm(f, c, t, b):
+def remove_confirm(c, t):
     global confirm
 
     confirm = Toplevel(root)
@@ -194,7 +257,7 @@ def remove_confirm(f, c, t, b):
     nex = Label(confirm, text=t,font=("Helvetica", 15), borderwidth=0, relief="solid",fg="black")
     nex.pack(side=TOP, pady=10)
 
-    btn = Button(confirm, text="OK", command=lambda: remove(f, c, t, b), borderwidth=2, relief="solid")
+    btn = Button(confirm, text="OK", command=lambda: remove(c, t), borderwidth=2, relief="solid")
     btn.pack(side=TOP, pady=10)
 
     confirm.lift()
@@ -206,7 +269,7 @@ def mark_unsaved():
         root.title(root.wm_title()+"*")
 
 # REMOVE
-def remove(f, c ,t, b):
+def remove(c ,t):
     confirm.destroy()
     i = 0
     seme = ""
@@ -220,7 +283,8 @@ def remove(f, c ,t, b):
             break
         i += 1
     refresh()
-    
+
+# REFRESH COURSE PAGE    
 def refresh():
     clear_window()
     course_page(startyear, startsem)
@@ -416,10 +480,10 @@ def course_page(year, sem):
             cur = "Spring"
             year+=1
         elif(cur == "Spring"):
-            j+=225
+            j+=210
             cur = "Summer"
         else:
-            j+=240
+            j+=210
             cur = "Fall"
         i-=1
         
@@ -459,17 +523,17 @@ global semester_offsets
 semester_offsets = {
     ("Fall", "Fall"): 0,
      ("Fall", "Spring"): 210,
-     ("Fall", "Summer"): 210 + 225,
-     ("Spring", "Fall"): 225 + 240,
+     ("Fall", "Summer"): 210 + 210,
+     ("Spring", "Fall"): 210 + 210,
   ("Spring", "Spring"): 0,
-    ("Spring", "Summer"): 225,
-     ("Summer", "Fall"): 240,
-     ("Summer", "Spring"): 240 + 210,
+    ("Spring", "Summer"): 210,
+     ("Summer", "Fall"): 210,
+     ("Summer", "Spring"): 210 + 210,
     ("Summer", "Summer"): 0
                         }
 
 global year_offset
-year_offset = 210+225+240
+year_offset = 210+210+210
 
 start_win()
 root.lift()
