@@ -13,9 +13,24 @@ class Course:
         self.year = ye
 # MAKE CANVAS
 def make_canvas():
+   # Create A Main frame
+    main_frame = Frame(root)
+    main_frame.pack(fill=BOTH,expand=1)
+    sec = Frame(main_frame)
+    sec.pack(fill=X,side=BOTTOM)
+    my_canvas = Canvas(main_frame)
+    my_canvas.pack(side=LEFT,fill=BOTH,expand=1)
+    x_scrollbar = ttk.Scrollbar(sec,orient=HORIZONTAL,command=my_canvas.xview)
+    x_scrollbar.pack(side=BOTTOM,fill=X)
+    my_canvas.configure(xscrollcommand=x_scrollbar.set)
+    my_canvas.bind("<Configure>",lambda e: my_canvas.config(scrollregion= my_canvas.bbox(ALL))) 
+    # Create Another Frame INSIDE the Canvas
     global canvas
-    canvas = Canvas(root, width=1920, height=1080)
-    canvas.pack(side=TOP, padx=0,pady=0)
+    canvas = Frame(my_canvas)
+    # Add that New Frame a Window In The Canvas
+    my_canvas.create_window((0,0),window= canvas, anchor="nw")
+
+
 # WINDOW CLEAR METHOD
 def clear_window():
     for widget in root.winfo_children():
@@ -463,37 +478,37 @@ def open_file():
 # COURSE PAGE BUILD
 #
 def course_page(year, sem):
-
-    st = str(sem) +" "+str(year)
+    st = str(sem) + " " + str(year)
     clear_window()
     i = 11
     j = 0
     cur = str(sem)
     make_canvas()
-    while (i>0):
-        nex = Label(canvas, text=cur +" "+str(year), font=("Helvetica", 20), borderwidth=0, relief="solid")
-        nex.place(x=j+10, y=0)
+    while i > 0:
+        nex = Label(canvas, text=cur + " " + str(year), font=("Helvetica", 20), borderwidth=0, relief="solid")
+        nex.grid(column=j, row=0, padx=10, pady=0)  # Add padding for spacing
 
         frame = Frame(canvas, borderwidth=5, relief="sunken", width=200, height=750)
-        frame.place(x=j, y=30)#20
+        frame.grid(column=j, row=1, padx=10, pady=10)  # Add padding for spacing
+        frame.pack_propagate(False)
 
-        btn = Button(canvas, text="+", fg="black", command=lambda x=j, s=cur, y=year: add(x, 40, s, y), borderwidth=2, relief="solid")
-        btn.place(x=j+70, y=40)#30
-        button_references.append(btn)   
+        btn = Button(frame, text="+", fg="black", command=lambda x=j, s=cur, y=year: add(x, 40, s, y), borderwidth=2, relief="solid")
+        btn.pack(side=TOP,pady=10)  # Add padding for spacing
+        button_references.append(btn)
 
-
-        if(cur == "Fall"):
-            j+=210
+        # Update semester and year
+        if cur == "Fall":
             cur = "Spring"
-            year+=1
-        elif(cur == "Spring"):
-            j+=210
+            year += 1
+        elif cur == "Spring":
             cur = "Summer"
         else:
-            j+=210
             cur = "Fall"
-        i-=1
+        
+        i -= 1
+        j += 1  # Keep incrementing the column number
     pass
+
         
 #
 # WINDOW SETUP
