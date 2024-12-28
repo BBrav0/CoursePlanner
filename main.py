@@ -165,7 +165,7 @@ def start_win():
     btn.pack(side=TOP, padx=10, pady=10)
 
 # ADD COURSE BUTTON
-def add(xx, yy, sem ,yer):
+def add(frame, sem ,yer):
     global popup
     popup = Toplevel(root)
     popup.title("Add Course")
@@ -203,18 +203,19 @@ def add(xx, yy, sem ,yer):
     cred = Entry(popup, width=5, borderwidth=2, relief="solid")
     cred.place(x=100, y=100)
 
-    btn = Button(popup, text="Add", fg="black", command=lambda: (mark_unsaved(), added(xx, yy, code.get(), title.get(), cred.get(), variable.get(), sem, yer)), borderwidth=2, relief="solid")
+    btn = Button(popup, text="Add", fg="black", command=lambda: (mark_unsaved(), added(frame, code.get(), title.get(), cred.get(), variable.get(), sem, yer)), borderwidth=2, relief="solid")
     btn.pack(side=BOTTOM, pady=50)
     button_references.append(btn)
 
 # COURSE ADDED BUTTON
-def added(xx, yy, co, ti, cr, gr, se, ye):
+def added(ogframe, co, ti, cr, gr, se, ye):
 
     # Add course object to the list
     courses.append(Course(co, ti, cr, gr, se, ye))
     # Create the course frame
-    frame = Frame(canvas, borderwidth=3, relief="raised", width=180, height=70, bg="lightgrey")
-    frame.place(x=xx + 10, y=yy)
+    frame = Frame(ogframe, borderwidth=3, relief="raised", width=180, height=70, bg="lightgrey")
+    frame.grid(column=0, row=0)
+    frame.grid_propagate(False)
 
     # Display course details
     code = Label(frame, text=co, fg="black", font=("Helvetica", 12, "bold"), bg="lightgrey")
@@ -230,14 +231,14 @@ def added(xx, yy, co, ti, cr, gr, se, ye):
     grade.place(x=150, y=5)
 
     root.update_idletasks()
-    for b in button_references:
-        try:
-            if b.winfo_x()==70+xx:
-                b.destroy()
-        except TclError:
-            pass
+    # for b in button_references:
+    #     try:
+    #         if b.winfo_x()==70+xx:
+    #             b.destroy()
+    #     except TclError:
+    #         pass
     btn = Button(canvas, text="+", fg="black", 
-                     command=lambda: (add(xx, yy + 70, se, ye)), borderwidth=2, relief="solid")
+                     command=lambda: (add(frame, se, ye)), borderwidth=2, relief="solid")
 
     
 
@@ -250,8 +251,8 @@ def added(xx, yy, co, ti, cr, gr, se, ye):
     frame.bind("<B1-Motion>", drag_motion)
     frame.bind("<ButtonRelease-1>", drag_stop)
     frame_references.append(frame)
-    if yy < 650: 
-        btn.place(x=xx + 70, y=yy + 100)
+    # if yy < 650: 
+    #     btn.place(x=xx + 70, y=yy + 100)
 
     button_references.append(btn)
     try:
@@ -490,10 +491,11 @@ def course_page(year, sem):
 
         frame = Frame(canvas, borderwidth=5, relief="sunken", width=200, height=750)
         frame.grid(column=j, row=1, padx=10, pady=10)  # Add padding for spacing
-        frame.pack_propagate(False)
+        frame.grid_propagate(False)
+        frame.grid_columnconfigure(0, weight=1)  # Center horizontally
 
-        btn = Button(frame, text="+", fg="black", command=lambda x=j, s=cur, y=year: add(x, 40, s, y), borderwidth=2, relief="solid")
-        btn.pack(side=TOP,pady=10)  # Add padding for spacing
+        btn = Button(frame, text="+", fg="black", command=lambda x=j, s=cur, y=year: add(frame, s, y), borderwidth=2, relief="solid")
+        btn.grid(column=0, row=0)  # Add padding for spacing
         button_references.append(btn)
 
         # Update semester and year
