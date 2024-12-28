@@ -379,7 +379,7 @@ def open_file():
             clear_window()
             root.title("Ben's Course Planner ("+file.name+")")
             curx = 0
-            cury = 30
+            cury = 40
             l = 0
             sSem = "Fall"
             sYr = 0
@@ -424,7 +424,7 @@ def open_file():
 
                         # Adjust curx based on semester and year
                         curx = 0
-                        cury = 30  # Fixed y position
+                        cury = 40  # Fixed y position
 
                         match sSem:
                             case "Spring":
@@ -447,7 +447,7 @@ def open_file():
                                         curx=semester_offsets.get((sSem, cSe) , 0)+((cYr-sYr)-1)*year_offset
 
                         existing_courses = [c for c in courses if c.sem == cSe and c.year == cYr]
-                        cury =30 + len(existing_courses) * 70
+                        cury =40 + len(existing_courses) * 70
                         added(curx, cury, cCo, cTi, cCr, cGr, cSe, cYr)
                         l = 1  # Reset line count after processing the course
 
@@ -464,14 +464,14 @@ def course_page(year, sem):
     j = 0
     cur = str(sem)
     while (i>0):
-        nex = Label(root, text=cur +" "+str(year), borderwidth=2, relief="solid")
-        nex.place(x=j, y=0)
+        nex = Label(root, text=cur +" "+str(year), font=("Helvetica", 20), borderwidth=0, relief="solid")
+        nex.place(x=j+10, y=0)
 
         frame = Frame(root, borderwidth=5, relief="sunken", width=200, height=750)
-        frame.place(x=j, y=20)
+        frame.place(x=j, y=30)#20
 
-        btn = Button(root, text="+", fg="black", command=lambda x=j, s=cur, y=year: add(x, 30, s, y), borderwidth=2, relief="solid")
-        btn.place(x=j+70, y=30)
+        btn = Button(root, text="+", fg="black", command=lambda x=j, s=cur, y=year: add(x, 40, s, y), borderwidth=2, relief="solid")
+        btn.place(x=j+70, y=40)#30
         button_references.append(btn)   
 
 
