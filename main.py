@@ -11,7 +11,11 @@ class Course:
         self.grade = gr
         self.sem = se
         self.year = ye
-
+# MAKE CANVAS
+def make_canvas():
+    global canvas
+    canvas = Canvas(root, width=1920, height=1080)
+    canvas.pack(side=TOP, padx=0,pady=0)
 # WINDOW CLEAR METHOD
 def clear_window():
     for widget in root.winfo_children():
@@ -194,7 +198,7 @@ def added(xx, yy, co, ti, cr, gr, se, ye):
     # Add course object to the list
     courses.append(Course(co, ti, cr, gr, se, ye))
     # Create the course frame
-    frame = Frame(root, borderwidth=3, relief="raised", width=180, height=70, bg="lightgrey")
+    frame = Frame(canvas, borderwidth=3, relief="raised", width=180, height=70, bg="lightgrey")
     frame.place(x=xx + 10, y=yy)
 
     # Display course details
@@ -217,7 +221,7 @@ def added(xx, yy, co, ti, cr, gr, se, ye):
                 b.destroy()
         except TclError:
             pass
-    btn = Button(root, text="+", fg="black", 
+    btn = Button(canvas, text="+", fg="black", 
                      command=lambda: (add(xx, yy + 70, se, ye)), borderwidth=2, relief="solid")
 
     
@@ -287,6 +291,7 @@ def remove(c ,t):
 # REFRESH COURSE PAGE    
 def refresh():
     clear_window()
+    make_canvas()
     course_page(startyear, startsem)
     temp = copy.deepcopy(courses)
     courses.clear()
@@ -377,6 +382,7 @@ def open_file():
         with open(file_path, "r") as file:
             courses.clear()
             clear_window()
+            make_canvas()
             root.title("Ben's Course Planner ("+file.name+")")
             curx = 0
             cury = 40
@@ -463,15 +469,15 @@ def course_page(year, sem):
     i = 11
     j = 0
     cur = str(sem)
-    canvas = Canvas(root, width=1920, height=1080, bg="lightblue")
+    make_canvas()
     while (i>0):
-        nex = Label(root, text=cur +" "+str(year), font=("Helvetica", 20), borderwidth=0, relief="solid")
+        nex = Label(canvas, text=cur +" "+str(year), font=("Helvetica", 20), borderwidth=0, relief="solid")
         nex.place(x=j+10, y=0)
 
-        frame = Frame(root, borderwidth=5, relief="sunken", width=200, height=750)
+        frame = Frame(canvas, borderwidth=5, relief="sunken", width=200, height=750)
         frame.place(x=j, y=30)#20
 
-        btn = Button(root, text="+", fg="black", command=lambda x=j, s=cur, y=year: add(x, 40, s, y), borderwidth=2, relief="solid")
+        btn = Button(canvas, text="+", fg="black", command=lambda x=j, s=cur, y=year: add(x, 40, s, y), borderwidth=2, relief="solid")
         btn.place(x=j+70, y=40)#30
         button_references.append(btn)   
 
@@ -512,6 +518,9 @@ menu.add_cascade(label='File', menu=item)
 root.config(menu=menu)
 
 # BIG GLOBALS
+global canvas
+make_canvas()
+
 global courses
 courses = []
 
