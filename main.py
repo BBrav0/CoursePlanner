@@ -231,7 +231,7 @@ def added(xx, yy, co, ti, cr, gr, se, ye):
     frame.bind("<B1-Motion>", drag_motion)
     frame.bind("<ButtonRelease-1>", drag_stop)
     frame_references.append(frame)
-    if yy < 600: 
+    if yy < 650: 
         btn.place(x=xx + 70, y=yy + 100)
 
     button_references.append(btn)
@@ -321,7 +321,7 @@ def refresh():
                     case "Spring":
                         curx=semester_offsets.get((sSem, cSe) , 0)+((cYr-sYr)-1)*year_offset
         existing_courses = [c for c in courses if c.sem == cSe and c.year == cYr]
-        cury = 30 + len(existing_courses) * 70
+        cury = 40 + len(existing_courses) * 70
         added(curx, cury, cCo, cTi, cCr, cGr, cSe, cYr)
 
 # SAVE METHOD
@@ -463,6 +463,7 @@ def course_page(year, sem):
     i = 11
     j = 0
     cur = str(sem)
+    canvas = Canvas(root, width=1920, height=1080, bg="lightblue")
     while (i>0):
         nex = Label(root, text=cur +" "+str(year), font=("Helvetica", 20), borderwidth=0, relief="solid")
         nex.place(x=j+10, y=0)
@@ -486,6 +487,7 @@ def course_page(year, sem):
             j+=210
             cur = "Fall"
         i-=1
+    pass
         
 #
 # WINDOW SETUP
