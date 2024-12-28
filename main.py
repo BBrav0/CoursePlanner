@@ -165,7 +165,8 @@ def start_win():
     btn.pack(side=TOP, padx=10, pady=10)
 
 # ADD COURSE BUTTON
-def add(frame, sem ,yer):
+def add(frame, count, sem ,yer):
+
     global popup
     popup = Toplevel(root)
     popup.title("Add Course")
@@ -203,19 +204,20 @@ def add(frame, sem ,yer):
     cred = Entry(popup, width=5, borderwidth=2, relief="solid")
     cred.place(x=100, y=100)
 
-    btn = Button(popup, text="Add", fg="black", command=lambda: (mark_unsaved(), added(frame, code.get(), title.get(), cred.get(), variable.get(), sem, yer)), borderwidth=2, relief="solid")
+    btn = Button(popup, text="Add", fg="black", command=lambda f=frame, c=count: (mark_unsaved(), added(f, c, code.get(), title.get(), cred.get(), variable.get(), sem, yer)), borderwidth=2, relief="solid")
     btn.pack(side=BOTTOM, pady=50)
     button_references.append(btn)
 
 # COURSE ADDED BUTTON
-def added(ogframe, co, ti, cr, gr, se, ye):
-
+def added(ogframe, count, co, ti, cr, gr, se, ye):
     # Add course object to the list
     courses.append(Course(co, ti, cr, gr, se, ye))
     # Create the course frame
     frame = Frame(ogframe, borderwidth=3, relief="raised", width=180, height=70, bg="lightgrey")
-    frame.grid(column=0, row=0)
-    frame.grid_propagate(False)
+    # Place the frame in the grid
+    frame.grid(column=0, row=count, padx=5, pady=(5,0))  # Increment rows dynamically
+    frame.grid_propagate(False)  # Prevent the frame from resizing to fit content
+    # Add some content to the frame (e.g., course information)
 
     # Display course details
     code = Label(frame, text=co, fg="black", font=("Helvetica", 12, "bold"), bg="lightgrey")
@@ -237,11 +239,9 @@ def added(ogframe, co, ti, cr, gr, se, ye):
     #             b.destroy()
     #     except TclError:
     #         pass
-    btn = Button(canvas, text="+", fg="black", 
-                     command=lambda: (add(frame, se, ye)), borderwidth=2, relief="solid")
-
+    btn = Button(ogframe, text="+", fg="black", 
+                     command=lambda f=ogframe, c=count+1: (add(f, c, se, ye)), borderwidth=2, relief="solid")
     
-
     remov = Canvas(frame, width=14, height=15, bg="white", highlightthickness=2)
     remov.place(x=151, y=23)
     remov.create_text(9, 9, text="X", fill="red", font=("Helvetica", 15, "bold"), anchor="center")
@@ -250,11 +250,10 @@ def added(ogframe, co, ti, cr, gr, se, ye):
     frame.bind("<Button-1>", lambda event: drag_start(event, co, ti))
     frame.bind("<B1-Motion>", drag_motion)
     frame.bind("<ButtonRelease-1>", drag_stop)
-    frame_references.append(frame)
-    # if yy < 650: 
-    #     btn.place(x=xx + 70, y=yy + 100)
-
-    button_references.append(btn)
+    print(str(count))
+    if count < 6: 
+         btn.grid(column=0, row=count+1)
+         button_references.append(btn)
     try:
         popup.destroy()
     except NameError:
@@ -306,44 +305,34 @@ def remove(c ,t):
 
 # REFRESH COURSE PAGE    
 def refresh():
+    print(str(len(big_frames)))
     clear_window()
-    make_canvas()
+    print(str(len(big_frames)))
     course_page(startyear, startsem)
+    print(str(len(big_frames)))
+    make_canvas()
     temp = copy.deepcopy(courses)
     courses.clear()
-    frame_references.clear()
     for cur in temp:
         sSem = startsem
-        cSe = cur.sem
+        cSem = cur.sem
         cYr = cur.year
         sYr=startyear
         cCo = cur.code
         cTi = cur.title
         cCr = cur.credits
         cGr = cur.grade
+        i = 0
+        while not ((sYr==cYr) and (sSem == cSem)):
+            print("Start year = "+str(sYr)+" start sem = "+sSem)
+            temp = forward_one(sSem, sYr)
+            sSem = temp[0]
+            sYr = int(temp[1])
+            i+=1
 
-        match startsem:
-            case "Spring":
-                curx=semester_offsets.get((sSem, cSe) , 0)+((cYr-sYr) *year_offset)
-            case "Summer":
-                match cSe:
-                    case "Summer":
-                        curx=semester_offsets.get((sSem, cSe) , 0)+(cYr-sYr)*year_offset
-                    case "Fall":
-                        curx=semester_offsets.get((sSem, cSe) , 0)+((cYr-sYr)*year_offset)
-                    case "Spring":
-                        curx=semester_offsets.get((sSem, cSe) , 0)+(((cYr-sYr)-1)*year_offset)
-            case "Fall":
-                match cSe:
-                    case "Summer":
-                        curx=semester_offsets.get((sSem, cSe) , 0)+((cYr-sYr)-1)*year_offset
-                    case "Fall":
-                        curx=semester_offsets.get((sSem, cSe) , 0)+(cYr-sYr)*year_offset
-                    case "Spring":
-                        curx=semester_offsets.get((sSem, cSe) , 0)+((cYr-sYr)-1)*year_offset
-        existing_courses = [c for c in courses if c.sem == cSe and c.year == cYr]
-        cury = 40 + len(existing_courses) * 70
-        added(curx, cury, cCo, cTi, cCr, cGr, cSe, cYr)
+        existing_courses = [c for c in courses if c.sem == cSem and c.year == cYr]
+        coun = len(existing_courses)
+        added(big_frames[i], coun, cCo, cTi, cCr, cGr, cSem, cYr)
 
 # SAVE METHOD
 def save():
@@ -479,6 +468,8 @@ def open_file():
 # COURSE PAGE BUILD
 #
 def course_page(year, sem):
+    global big_frames
+    big_frame=[]
     st = str(sem) + " " + str(year)
     clear_window()
     i = 11
@@ -489,14 +480,16 @@ def course_page(year, sem):
         nex = Label(canvas, text=cur + " " + str(year), font=("Helvetica", 20), borderwidth=0, relief="solid")
         nex.grid(column=j, row=0, padx=10, pady=0)  # Add padding for spacing
 
-        frame = Frame(canvas, borderwidth=5, relief="sunken", width=200, height=750)
-        frame.grid(column=j, row=1, padx=10, pady=10)  # Add padding for spacing
-        frame.grid_propagate(False)
-        frame.grid_columnconfigure(0, weight=1)  # Center horizontally
-
-        btn = Button(frame, text="+", fg="black", command=lambda x=j, s=cur, y=year: add(frame, s, y), borderwidth=2, relief="solid")
+        fram = Frame(canvas, borderwidth=5, relief="sunken", width=200, height=750)
+        fram.grid(column=j, row=1, padx=10, pady=10)  # Add padding for spacing
+        fram.grid_propagate(False)
+        fram.grid_columnconfigure(0, weight=1)  # Center horizontally
+        big_frame.append(fram)
+        btn = Button(fram, text="+", fg="black", command=lambda f=fram, s=cur, y=year: add(f, 0, s, y))
         btn.grid(column=0, row=0)  # Add padding for spacing
         button_references.append(btn)
+
+    
 
         # Update semester and year
         if cur == "Fall":
@@ -544,8 +537,8 @@ courses = []
 global button_references
 button_references = []
 
-global frame_references
-frame_references = []
+global big_frames
+big_frames = []
 
 global semester_offsets
 semester_offsets = {

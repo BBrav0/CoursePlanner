@@ -1,47 +1,33 @@
-from tkinter import ttk
-import tkinter as tk
-import tkinter
-
-
-root = tk.Tk()
-root.title('Full Window Scrolling X Y Scrollbar Example')
-root.geometry("1350x400")
-
-# Create A Main frame
-main_frame = tk.Frame(root)
-main_frame.pack(fill=tk.BOTH,expand=1)
-
-# Create Frame for X Scrollbar
-sec = tk.Frame(main_frame)
-sec.pack(fill=tk.X,side=tk.BOTTOM)
-
-# Create A Canvas
-my_canvas = tk.Canvas(main_frame)
-my_canvas.pack(side=tk.LEFT,fill=tk.BOTH,expand=1)
-
-# Add A Scrollbars to Canvas
-x_scrollbar = ttk.Scrollbar(sec,orient=tk.HORIZONTAL,command=my_canvas.xview)
-x_scrollbar.pack(side=tk.BOTTOM,fill=tk.X)
-y_scrollbar = ttk.Scrollbar(main_frame,orient=tk.VERTICAL,command=my_canvas.yview)
-y_scrollbar.pack(side=tk.RIGHT,fill=tk.Y)
-
-# Configure the canvas
-my_canvas.configure(xscrollcommand=x_scrollbar.set)
-my_canvas.configure(yscrollcommand=y_scrollbar.set)
-my_canvas.bind("<Configure>",lambda e: my_canvas.config(scrollregion= my_canvas.bbox(tk.ALL))) 
-
-# Create Another Frame INSIDE the Canvas
-canvas = tk.Frame(my_canvas)
-
-# Add that New Frame a Window In The Canvas
-my_canvas.create_window((0,0),window= canvas, anchor="nw")
-
-nex = tk.Label(canvas, text="balls", font=("Helvetica", 20), borderwidth=0, relief="solid")
-nex.grid(row=5, column=5)
-frame = tk.Frame(canvas, borderwidth=5, relief="sunken", width=200, height=750)
-frame.place(x=0, y=30)#20
-
-root.lift()
-root.focus_force()
-
-root.mainloop()
+from tkinter import *
+import random
+  
+def randomColor ():
+    randomRed = ("00" + hex(random.randint(0, 255))[2:])[-2]
+    randomGreen = ("00" + hex(random.randint(0, 255))[2:])[-2]
+    randomBlue = ("00" + hex(random.randint(0, 255))[2:])[-2]
+    return "#{}{}{}".format(randomRed, randomGreen, randomBlue)
+  
+class RandomColorNestedFramesApp:
+  
+    def __init__(self, master):
+        self.master = master
+        self.master.geometry("1024x1024+50+50")
+        self.bgFrame = Frame(self.master, bg = randomColor())
+        self.bgFrame.place(relx = 0, rely = 0, relwidth = 1, relheight = 1)
+        self.addFrameButton = Button(self.bgFrame, text = "add sub-frame", bg = "#FF00CC", fg = "black", font = "Times 11", command = self.addDaughterFrame)
+        self.addFrameButton.place(relx = 0, rely = 0, relwidth = 0.25, relheight = 0.07)
+        self.frameList = []
+  
+    def addDaughterFrame (self):
+        if len(self.frameList) < 2:
+            self.frameList.append(Frame(self.bgFrame, bg = randomColor()))
+  
+        else:
+            self.frameList.append(Frame(self.frameList[-2], bg = randomColor()))
+  
+        self.frameList[-1].place(anchor = "center", relx = 0.5, rely = 0.5, relwidth = 0.96, relheight = 0.96)
+  
+if __name__ == "__main__":
+    root = Tk()
+    theApp = RandomColorNestedFramesApp(root)
+    root.mainloop()
