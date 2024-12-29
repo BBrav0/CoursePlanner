@@ -72,7 +72,6 @@ def drag_motion(event):
     # Move the widget to the new position
     widget.place(x=x, y=y)
 
-
 # DONE DRAGGING
 def drag_stop(event):
     widget = event.widget
@@ -230,7 +229,7 @@ def added(ogframe, f_offset, count, co, ti, cr, gr, se, ye):
     code = Label(frame, text=co, fg="black", font=("Helvetica", 12, "bold"), bg="lightgrey")
     code.place(x=5, y=5)
 
-    title = Label(frame, text=ti, fg="black", font=("Helvetica", 14), bg="lightgrey", wraplength=150)
+    title = Label(frame, text=ti, fg="black", font=("Helvetica", 14), bg="lightgrey", wraplength=144)
     title.place(x=5, y=20)
 
     credits = Label(frame, text=f"{cr} credits", fg="black", font=("Helvetica", 12, "bold"), bg="lightgrey")
@@ -247,7 +246,7 @@ def added(ogframe, f_offset, count, co, ti, cr, gr, se, ye):
          except TclError:
              pass
     btn = Button(canvas, text="+", fg="black", 
-                     command=lambda f=ogframe, fo = f_offset, c=count+1: (add(f, f_offset, c, se, ye)), borderwidth=2, relief="solid")
+                     command=lambda f=ogframe, fo = f_offset, c=count+1: (add(f, fo, c, se, ye)), borderwidth=2, relief="solid")
     
     remov = Canvas(frame, width=14, height=15, bg="white", highlightthickness=2)
     remov.place(x=151, y=23)
@@ -490,12 +489,10 @@ def course_page(year, sem):
     bottom_frame.grid_propagate(False)
     gpa = Label(bottom_frame, text="GPA")
     gpa.pack(side=BOTTOM, anchor=CENTER)
-
-        
+      
 #
 # WINDOW SETUP
 #
-
 global root
 root = Tk()
 root.title("Ben's Course Planner")
@@ -549,4 +546,3 @@ root.lift()
 root.focus_force()
 
 root.mainloop()
-
