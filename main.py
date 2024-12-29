@@ -3,6 +3,7 @@ from tkinter import ttk
 from tkinter import filedialog
 import copy
 
+#COURSE CLASS
 class Course:
     def __init__(self, co, ti, cr, gr, se, ye):
         self.code = co
@@ -11,6 +12,7 @@ class Course:
         self.grade = gr
         self.sem = se
         self.year = ye
+
 # MAKE CANVAS
 def make_canvas():
    # Create A Main frame
@@ -176,7 +178,6 @@ def start_win():
 
 # ADD COURSE BUTTON
 def add(frame, f_offset, count, sem ,yer):
-
     global popup
     popup = Toplevel(root)
     popup.title("Add Course")
@@ -197,7 +198,7 @@ def add(frame, f_offset, count, sem ,yer):
     nex = Label(popup, text="Grade", borderwidth=2, relief="solid")
     nex.place(x=0, y=150)
 
-    grades = ["","A","A-","B+","B","B-","C+","C","C-","F"]
+    grades = ["","A","A-","B+","B","B-","C+","C","C-","D+","D","D-","F"]
 
     variable = StringVar(root)
     variable.set(grades[0])
@@ -259,6 +260,9 @@ def added(ogframe, f_offset, count, co, ti, cr, gr, se, ye):
     frame.bind("<Button-1>", lambda event: drag_start(event, co, ti))
     frame.bind("<B1-Motion>", drag_motion)
     frame.bind("<ButtonRelease-1>", drag_stop)
+
+    calc_cum_gpa()
+    gpa.configure(text=f"Cumulative GPA: {cum_gpa:.3f}")
     if count < 7: 
          btn.place(x=87+(f_offset*220),y=45+((count+1)*75))
          button_references.append(btn)
@@ -442,6 +446,8 @@ def open_file():
                         existing_courses = [c for c in courses if c.sem == cSe and c.year == cYr]
                         coun = len(existing_courses)
                         added(big_frames[i], i, coun, cCo, cTi, cCr, cGr, cSe, cYr)
+                        calc_cum_gpa()
+                        gpa.configure(text=f"Cumulative GPA: {cum_gpa:.3f}")
                         l = 1  # Reset line count after processing the course
 
     root.focus_force()
@@ -473,8 +479,6 @@ def course_page(year, sem):
         btn.place(x=87+(i*220), y=45)  # Add padding for spacing
         button_references.append(btn)
 
-    
-
         # Update semester and year
         if cur == "Fall":
             cur = "Spring"
@@ -491,9 +495,51 @@ def course_page(year, sem):
     bottom_frame.pack(side=BOTTOM, anchor=CENTER)
     bottom_frame.pack_propagate(False)
     bottom_frame.grid_propagate(False)
-    gpa = Label(bottom_frame, text="GPA")
-    gpa.pack(side=BOTTOM, anchor=CENTER)
-      
+    global gpa
+    calc_cum_gpa()
+    gpa = Label(bottom_frame, text=f"Cumulative GPA: {cum_gpa:.3f}",font=("Times New Roman", 30, "bold"))
+    gpa.pack(side=LEFT, padx=(200, 0))
+
+# CALCULATE CUMULATIVE GPA     
+def calc_cum_gpa():
+    global cum_gpa
+    grade_points = 0.0
+    cur_points = 0.0
+    cur_credits= 0
+    cum_gpa=0.0
+    for c in courses:
+        match c.grade:
+            case "":
+                grade_points = 0.0
+            case "A":
+                grade_points = 4.0
+            case "A-":
+                grade_points = 3.75
+            case "B+":
+                grade_points = 3.25
+            case "B":
+                grade_points = 3.0
+            case "B-":
+                grade_points = 2.75
+            case "C+":
+                grade_points = 2.25
+            case "C":
+                grade_points = 2.0
+            case "C-":
+                grade_points = 1.75
+            case "D+":
+                grade_points = 1.25
+            case "D":
+                grade_points = 1.0
+            case "D-":
+                grade_points = 0.75
+            case "F":
+                grade_points = 0.0
+        cur_points += float(grade_points*float(c.credits))
+        cur_credits+=int(c.credits)
+    if not (cur_credits==0):
+        cum_gpa=float(cur_points/cur_credits)
+  
 #
 # WINDOW SETUP
 #
@@ -508,7 +554,7 @@ root.columnconfigure(0, weight=1)
 menu = Menu(root)
 global item
 item = Menu(menu, tearoff=0) 
-item.add_command(label='New', command=start_win, state='disabled')
+item.add_command(label='New', command=lambda: (start_win()), state='disabled')
 item.add_command(label='Save', command=save, state="disabled")
 item.add_command(label='Save as', command=save_as, state="disabled")
 item.add_command(label='Open', command=open_file)
@@ -518,6 +564,7 @@ root.config(menu=menu)
 # BIG GLOBALS
 global canvas
 global my_canvas
+global gpa
 make_canvas()
 
 global courses
@@ -529,18 +576,21 @@ button_references = []
 global big_frames
 big_frames = []
 
+global cum_gpa
+cum_gpa = 0.000
+
 global semester_offsets
 semester_offsets = {
     ("Fall", "Fall"): 0,
-     ("Fall", "Spring"): 210,
-     ("Fall", "Summer"): 210 + 210,
-     ("Spring", "Fall"): 210 + 210,
-  ("Spring", "Spring"): 0,
+    ("Fall", "Spring"): 210,
+    ("Fall", "Summer"): 210 + 210,
+    ("Spring", "Fall"): 210 + 210,
+    ("Spring", "Spring"): 0,
     ("Spring", "Summer"): 210,
-     ("Summer", "Fall"): 210,
-     ("Summer", "Spring"): 210 + 210,
+    ("Summer", "Fall"): 210,
+    ("Summer", "Spring"): 210 + 210,
     ("Summer", "Summer"): 0
-                        }
+    }
 
 global year_offset
 year_offset = 210+210+210
