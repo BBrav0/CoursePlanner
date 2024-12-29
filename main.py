@@ -151,6 +151,9 @@ def start_coursepage():
 #
 def start_win():
     clear_window()
+    item.entryconfig('Save as', state="disabled")
+    item.entryconfig('Save', state="disabled")
+    item.entryconfig('New', state="disabled")
     global lbl 
     lbl = Label(root, text="Please enter your start year (e.g. '2022') and semester", borderwidth=2, relief="solid")
     lbl.pack(side=TOP, padx=10, pady=10)
@@ -351,7 +354,6 @@ def save():
 # SAVE AS METHOD
 def save_as():
     global file_path
-    item.entryconfig('Save', state="normal")
     file_path = filedialog.asksaveasfilename(
     title="Save As",
     defaultextension=".txt",  # Set default file extension
@@ -360,7 +362,7 @@ def save_as():
 
 # Check if a file path was selected
     if file_path:
-
+        item.entryconfig('Save', state="normal")
         # Save file operation
         with open(file_path, 'w') as file:
             root.title("Ben's Course Planner ("+file.name+")")
@@ -377,7 +379,6 @@ def save_as():
 # OPEN FILE METHOD
 def open_file():
     global file_path
-    item.entryconfig('Save', state="normal")
     file_path = filedialog.askopenfilename(
         title="Open",
         defaultextension=".txt",  # Set default file extension
@@ -385,6 +386,7 @@ def open_file():
     )
 
     if file_path:
+        item.entryconfig('Save', state="normal")
         with open(file_path, "r") as file:
             courses.clear()
             clear_window()
@@ -448,6 +450,8 @@ def open_file():
 # COURSE PAGE BUILD
 #
 def course_page(year, sem):
+    item.entryconfig('Save as', state="normal")
+    item.entryconfig('New', state="normal")
     global big_frames
     big_frames=[]
     st = str(sem) + " " + str(year)
@@ -504,9 +508,9 @@ root.columnconfigure(0, weight=1)
 menu = Menu(root)
 global item
 item = Menu(menu, tearoff=0) 
-item.add_command(label='New', command=start_win)
+item.add_command(label='New', command=start_win, state='disabled')
 item.add_command(label='Save', command=save, state="disabled")
-item.add_command(label='Save as', command=save_as)
+item.add_command(label='Save as', command=save_as, state="disabled")
 item.add_command(label='Open', command=open_file)
 menu.add_cascade(label='File', menu=item)
 root.config(menu=menu)
