@@ -14,6 +14,7 @@ class Course:
 # MAKE CANVAS
 def make_canvas():
    # Create A Main frame
+    global my_canvas
     main_frame = Frame(root)
     main_frame.pack(fill=BOTH,expand=1)
     sec = Frame(main_frame)
@@ -151,7 +152,6 @@ def start_coursepage():
 #
 def start_win():
     clear_window()
-
     global lbl 
     lbl = Label(root, text="Please enter your start year (e.g. '2022') and semester", borderwidth=2, relief="solid")
     lbl.pack(side=TOP, padx=10, pady=10)
@@ -457,7 +457,6 @@ def course_page(year, sem):
     i = 0
     j = 0
     cur = str(sem)
-    
     while i < 11:
         nex = Label(canvas, text=cur + " " + str(year), font=("Helvetica", 20), borderwidth=0, relief="solid")
         nex.grid(column=j, row=0, padx=10, pady=0)  # Add padding for spacing
@@ -485,6 +484,12 @@ def course_page(year, sem):
         i += 1
         j += 1  # Keep incrementing the column number
     pass
+    bottom_frame = Frame(root, height=150, width=1920)
+    bottom_frame.pack(side=BOTTOM, anchor=CENTER)
+    bottom_frame.pack_propagate(False)
+    bottom_frame.grid_propagate(False)
+    gpa = Label(bottom_frame, text="GPA")
+    gpa.pack(side=BOTTOM, anchor=CENTER)
 
         
 #
@@ -511,6 +516,7 @@ root.config(menu=menu)
 
 # BIG GLOBALS
 global canvas
+global my_canvas
 make_canvas()
 
 global courses
