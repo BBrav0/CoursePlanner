@@ -264,6 +264,18 @@ def added(ogframe, f_offset, count, co, ti, cr, gr, se, ye):
 
     calc_cum_gpa()
     gpa.configure(text=f"Cumulative GPA: {cum_gpa:.3f}")
+    
+    for t in term_infos:
+        sSem = startsem
+        sYr = startyear
+        i=0
+        while not ((sYr==ye) and (sSem == se)):
+            temp = forward_one(sSem, sYr)
+            sSem = temp[0]
+            sYr = int(temp[1])
+            i+=1
+        term_infos[i].configure(text=f"Term GPA: {calc_term_gpa(se, ye):.3f}")
+
     if count < 7: 
          btn.place(x=87+(f_offset*220),y=45+((count+1)*75))
          button_references.append(btn)
@@ -271,6 +283,7 @@ def added(ogframe, f_offset, count, co, ti, cr, gr, se, ye):
         popup.destroy()
     except NameError:
         pass
+
 
 # REMOVE POPUP CONFIRMATION
 def remove_confirm(c, t):
@@ -467,6 +480,7 @@ def course_page(year, sem):
     i = 0
     j = 0
     cur = str(sem)
+    term_infos.clear()
     while i < 11:
         nex = Label(canvas, text=cur + " " + str(year), font=("Helvetica", 20), borderwidth=0, relief="solid")
         nex.grid(column=j, row=0, padx=10, pady=0)  # Add padding for spacing
@@ -475,10 +489,15 @@ def course_page(year, sem):
         fram.grid(column=j, row=1, padx=10, pady=10)  # Add padding for spacing
         fram.grid_propagate(False)
         fram.grid_columnconfigure(0, weight=1)  # Center horizontally
+
         big_frames.append(fram)
         btn = Button(canvas, text="+", fg="black", command=lambda jo = j, f=fram, s=cur, y=year: add(f, jo, 0, s, y))
         btn.place(x=87+(i*220), y=45)  # Add padding for spacing
         button_references.append(btn)
+
+        term = Label(canvas, text=f"Term GPA: {calc_term_gpa(cur, year):.3f}", font=("Helvetica", 20), borderwidth=0, relief="solid")
+        term.grid(column=j, row=2, padx=10, pady=(5,0))  # Add padding for spacing
+        term_infos.append(term)
 
         # Update semester and year
         if cur == "Fall":
@@ -500,6 +519,49 @@ def course_page(year, sem):
     calc_cum_gpa()
     gpa = Label(bottom_frame, text=f"Cumulative GPA: {cum_gpa:.3f}",font=("Times New Roman", 30, "bold"))
     gpa.pack(side=LEFT, padx=(200, 0))
+
+# CALCULATE TERM GPA
+def calc_term_gpa(s, y):
+    grade_points = 0.0
+    cur_points = 0.0
+    cur_credits= 0
+    term_gpa=0.0
+    for c in courses:
+        if (c.sem ==s) and (c.year==y):
+            match c.grade:
+                case "":
+                    grade_points = 0.0
+                case "A":
+                    grade_points = 4.0
+                case "A-":
+                    grade_points = 3.75
+                case "B+":
+                    grade_points = 3.25
+                case "B":
+                    grade_points = 3.0
+                case "B-":
+                    grade_points = 2.75
+                case "C+":
+                    grade_points = 2.25
+                case "C":
+                    grade_points = 2.0
+                case "C-":
+                    grade_points = 1.75
+                case "D+":
+                    grade_points = 1.25
+                case "D":
+                    grade_points = 1.0
+                case "D-":
+                    grade_points = 0.75
+                case "F":
+                    grade_points = 0.0
+            cur_points += float(grade_points*float(c.credits))
+            cur_credits+=int(c.credits)
+    if not (cur_credits==0):
+        term_gpa=float(cur_points/cur_credits)
+    else:
+        term_gpa=0.0
+    return term_gpa
 
 # CALCULATE CUMULATIVE GPA     
 def calc_cum_gpa():
@@ -542,9 +604,6 @@ def calc_cum_gpa():
         cum_gpa=float(cur_points/cur_credits)
     else:
         cum_gpa=0.0
-    if (len(courses)==0):
-        cum_gpa=0.0
-
   
 #
 # WINDOW SETUP
@@ -585,18 +644,8 @@ big_frames = []
 global cum_gpa
 cum_gpa = 0.000
 
-global semester_offsets
-semester_offsets = {
-    ("Fall", "Fall"): 0,
-    ("Fall", "Spring"): 210,
-    ("Fall", "Summer"): 210 + 210,
-    ("Spring", "Fall"): 210 + 210,
-    ("Spring", "Spring"): 0,
-    ("Spring", "Summer"): 210,
-    ("Summer", "Fall"): 210,
-    ("Summer", "Spring"): 210 + 210,
-    ("Summer", "Summer"): 0
-    }
+global term_infos
+term_infos = []
 
 global year_offset
 year_offset = 210+210+210
