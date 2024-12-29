@@ -30,7 +30,6 @@ def make_canvas():
     # Add that New Frame a Window In The Canvas
     my_canvas.create_window((0,0),window= canvas, anchor="nw")
 
-
 # WINDOW CLEAR METHOD
 def clear_window():
     for widget in root.winfo_children():
@@ -47,26 +46,43 @@ def drag_start_info(cod, tit):
 
 # START DRAGGING
 def drag_start(event, cod, tit):
+    print("Drag start triggered")
     drag_start_info(cod, tit)
     widget = event.widget
-    widget.lift()
-    global drag_start_x
+
+    # Store the starting position of the drag
     widget._drag_start_x = event.x
     widget._drag_start_y = event.y
-    drag_start_x = widget.winfo_x()
 
-# WHILE DRAGGING
+    # Get the widget's position in the root window
+    widget.drag_start_root_x = widget.winfo_rootx()
+    widget.drag_start_root_y = widget.winfo_rooty()
+
+    global drag_start_x, drag_start_y
+    drag_start_x = widget.drag_start_root_x
+    drag_start_y = widget.drag_start_root_y
+
+
 def drag_motion(event):
     widget = event.widget
-    x = widget.winfo_x() - widget._drag_start_x + event.x
-    y = widget.winfo_y() - widget._drag_start_y + event.y
+
+    if not hasattr(widget, "_drag_start_x") or not hasattr(widget, "_drag_start_y"):
+        print("Warning: Missing _drag_start attributes on widget")
+        return
+
+    # Calculate the new position
+    x = widget.winfo_x() + (event.x - widget._drag_start_x)
+    y = widget.winfo_y() + (event.y - widget._drag_start_y)
+
+    # Move the widget to the new position
     widget.place(x=x, y=y)
+
 
 # DONE DRAGGING
 def drag_stop(event):
     widget = event.widget
-    x = widget.winfo_x()  # Final x position
-    y = widget.winfo_y()  # Final y position
+    x = widget.winfo_rootx()  # Final x position
+    y = widget.winfo_rooty()  # Final y position
     x_offset = x-drag_start_x
     if (x_offset > 150 or x_offset < -150):
         mark_unsaved()
@@ -92,8 +108,6 @@ def drag_stop(event):
                 j-=1
         courses.append(cours)
     refresh()
-    
-    #THRESHOLD SHOULD BE +150 X OR -150 X
 
 # BACK ONE SEMESTER HELPER METHOD
 def back_one(sem, year):
@@ -251,7 +265,7 @@ def added(ogframe, count, co, ti, cr, gr, se, ye):
     frame.bind("<B1-Motion>", drag_motion)
     frame.bind("<ButtonRelease-1>", drag_stop)
     print(str(count))
-    if count < 6: 
+    if count < 7: 
          btn.grid(column=0, row=count+1)
          button_references.append(btn)
     try:
@@ -307,10 +321,10 @@ def remove(c ,t):
 def refresh():
     print(str(len(big_frames)))
     clear_window()
+    make_canvas()
     print(str(len(big_frames)))
     course_page(startyear, startsem)
     print(str(len(big_frames)))
-    make_canvas()
     temp = copy.deepcopy(courses)
     courses.clear()
     for cur in temp:
@@ -389,8 +403,6 @@ def open_file():
             clear_window()
             make_canvas()
             root.title("Ben's Course Planner ("+file.name+")")
-            curx = 0
-            cury = 40
             l = 0
             sSem = "Fall"
             sYr = 0
@@ -429,37 +441,19 @@ def open_file():
                         l += 1
                     case 6:
                         cYr = line.split('=')[1].strip()
-                        if len(cYr) == 2:  # Two-digit year fix
-                            cYr = "20" + cYr  # Convert "23" to "2023"
                         cYr = int(cYr)
-
-                        # Adjust curx based on semester and year
-                        curx = 0
-                        cury = 40  # Fixed y position
-
-                        match sSem:
-                            case "Spring":
-                                curx=semester_offsets.get((sSem, cSe) , 0)+((cYr-sYr) *year_offset)
-                            case "Summer":
-                                match cSe:
-                                    case "Summer":
-                                        curx=semester_offsets.get((sSem, cSe) , 0)+(cYr-sYr)*year_offset
-                                    case "Fall":
-                                        curx=semester_offsets.get((sSem, cSe) , 0)+((cYr-sYr)*year_offset)
-                                    case "Spring":
-                                        curx=semester_offsets.get((sSem, cSe) , 0)+(((cYr-sYr)-1)*year_offset)
-                            case "Fall":
-                                match cSe:
-                                    case "Summer":
-                                        curx=semester_offsets.get((sSem, cSe) , 0)+((cYr-sYr)-1)*year_offset
-                                    case "Fall":
-                                        curx=semester_offsets.get((sSem, cSe) , 0)+(cYr-sYr)*year_offset
-                                    case "Spring":
-                                        curx=semester_offsets.get((sSem, cSe) , 0)+((cYr-sYr)-1)*year_offset
-
+                        sYr=startyear
+                        sSem=startsem
+                        i = 0
+                        while not ((sYr==cYr) and (sSem == cSe)):
+                            print("Start year = "+str(sYr)+" start sem = "+sSem)
+                            temp = forward_one(sSem, sYr)
+                            sSem = temp[0]
+                            sYr = int(temp[1])
+                            i+=1
                         existing_courses = [c for c in courses if c.sem == cSe and c.year == cYr]
-                        cury =40 + len(existing_courses) * 70
-                        added(curx, cury, cCo, cTi, cCr, cGr, cSe, cYr)
+                        coun = len(existing_courses)
+                        added(big_frames[i], coun, cCo, cTi, cCr, cGr, cSe, cYr)
                         l = 1  # Reset line count after processing the course
 
     root.focus_force()
@@ -469,22 +463,23 @@ def open_file():
 #
 def course_page(year, sem):
     global big_frames
-    big_frame=[]
+    big_frames=[]
     st = str(sem) + " " + str(year)
     clear_window()
+    make_canvas()
     i = 11
     j = 0
     cur = str(sem)
-    make_canvas()
+    
     while i > 0:
         nex = Label(canvas, text=cur + " " + str(year), font=("Helvetica", 20), borderwidth=0, relief="solid")
         nex.grid(column=j, row=0, padx=10, pady=0)  # Add padding for spacing
 
-        fram = Frame(canvas, borderwidth=5, relief="sunken", width=200, height=750)
+        fram = Frame(canvas, borderwidth=5, relief="sunken", width=200, height=650)
         fram.grid(column=j, row=1, padx=10, pady=10)  # Add padding for spacing
         fram.grid_propagate(False)
         fram.grid_columnconfigure(0, weight=1)  # Center horizontally
-        big_frame.append(fram)
+        big_frames.append(fram)
         btn = Button(fram, text="+", fg="black", command=lambda f=fram, s=cur, y=year: add(f, 0, s, y))
         btn.grid(column=0, row=0)  # Add padding for spacing
         button_references.append(btn)
