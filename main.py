@@ -139,6 +139,7 @@ def start_coursepage():
     global startsem
     startsem = "Fall"
     startyear = 0
+    courses.clear()
     try:
         startyear = int(txt.get())
         startsem = variable.get()
@@ -539,6 +540,11 @@ def calc_cum_gpa():
         cur_credits+=int(c.credits)
     if not (cur_credits==0):
         cum_gpa=float(cur_points/cur_credits)
+    else:
+        cum_gpa=0.0
+    if (len(courses)==0):
+        cum_gpa=0.0
+
   
 #
 # WINDOW SETUP
