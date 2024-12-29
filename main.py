@@ -46,10 +46,9 @@ def drag_start_info(cod, tit):
 
 # START DRAGGING
 def drag_start(event, cod, tit):
-    print("Drag start triggered")
     drag_start_info(cod, tit)
     widget = event.widget
-
+    widget.lift()
     # Store the starting position of the drag
     widget._drag_start_x = event.x
     widget._drag_start_y = event.y
@@ -62,14 +61,9 @@ def drag_start(event, cod, tit):
     drag_start_x = widget.drag_start_root_x
     drag_start_y = widget.drag_start_root_y
 
-
+# DRAG IN MOTION
 def drag_motion(event):
     widget = event.widget
-
-    if not hasattr(widget, "_drag_start_x") or not hasattr(widget, "_drag_start_y"):
-        print("Warning: Missing _drag_start attributes on widget")
-        return
-
     # Calculate the new position
     x = widget.winfo_x() + (event.x - widget._drag_start_x)
     y = widget.winfo_y() + (event.y - widget._drag_start_y)
@@ -179,7 +173,7 @@ def start_win():
     btn.pack(side=TOP, padx=10, pady=10)
 
 # ADD COURSE BUTTON
-def add(frame, count, sem ,yer):
+def add(frame, f_offset, count, sem ,yer):
 
     global popup
     popup = Toplevel(root)
@@ -218,20 +212,19 @@ def add(frame, count, sem ,yer):
     cred = Entry(popup, width=5, borderwidth=2, relief="solid")
     cred.place(x=100, y=100)
 
-    btn = Button(popup, text="Add", fg="black", command=lambda f=frame, c=count: (mark_unsaved(), added(f, c, code.get(), title.get(), cred.get(), variable.get(), sem, yer)), borderwidth=2, relief="solid")
+    btn = Button(popup, text="Add", fg="black", command=lambda f=frame, c=count, fo=f_offset: (mark_unsaved(), added(f, fo, c, code.get(), title.get(), cred.get(), variable.get(), sem, yer)), borderwidth=2, relief="solid")
     btn.pack(side=BOTTOM, pady=50)
     button_references.append(btn)
 
 # COURSE ADDED BUTTON
-def added(ogframe, count, co, ti, cr, gr, se, ye):
+def added(ogframe, f_offset, count, co, ti, cr, gr, se, ye):
     # Add course object to the list
     courses.append(Course(co, ti, cr, gr, se, ye))
     # Create the course frame
-    frame = Frame(ogframe, borderwidth=3, relief="raised", width=180, height=70, bg="lightgrey")
+    frame = Frame(canvas, borderwidth=3, relief="raised", width=180, height=70, bg="lightgrey")
     # Place the frame in the grid
-    frame.grid(column=0, row=count, padx=5, pady=(5,0))  # Increment rows dynamically
-    frame.grid_propagate(False)  # Prevent the frame from resizing to fit content
-    # Add some content to the frame (e.g., course information)
+    frame.place(x=20+(f_offset*220),y=45+(count*75))
+    #f_offset*100
 
     # Display course details
     code = Label(frame, text=co, fg="black", font=("Helvetica", 12, "bold"), bg="lightgrey")
@@ -247,14 +240,14 @@ def added(ogframe, count, co, ti, cr, gr, se, ye):
     grade.place(x=150, y=5)
 
     root.update_idletasks()
-    # for b in button_references:
-    #     try:
-    #         if b.winfo_x()==70+xx:
-    #             b.destroy()
-    #     except TclError:
-    #         pass
-    btn = Button(ogframe, text="+", fg="black", 
-                     command=lambda f=ogframe, c=count+1: (add(f, c, se, ye)), borderwidth=2, relief="solid")
+    for b in button_references:
+         try:
+             if b.winfo_x()==87+(f_offset*220):
+                 b.destroy()
+         except TclError:
+             pass
+    btn = Button(canvas, text="+", fg="black", 
+                     command=lambda f=ogframe, fo = f_offset, c=count+1: (add(f, f_offset, c, se, ye)), borderwidth=2, relief="solid")
     
     remov = Canvas(frame, width=14, height=15, bg="white", highlightthickness=2)
     remov.place(x=151, y=23)
@@ -264,9 +257,8 @@ def added(ogframe, count, co, ti, cr, gr, se, ye):
     frame.bind("<Button-1>", lambda event: drag_start(event, co, ti))
     frame.bind("<B1-Motion>", drag_motion)
     frame.bind("<ButtonRelease-1>", drag_stop)
-    print(str(count))
     if count < 7: 
-         btn.grid(column=0, row=count+1)
+         btn.place(x=87+(f_offset*220),y=45+((count+1)*75))
          button_references.append(btn)
     try:
         popup.destroy()
@@ -319,12 +311,9 @@ def remove(c ,t):
 
 # REFRESH COURSE PAGE    
 def refresh():
-    print(str(len(big_frames)))
     clear_window()
     make_canvas()
-    print(str(len(big_frames)))
     course_page(startyear, startsem)
-    print(str(len(big_frames)))
     temp = copy.deepcopy(courses)
     courses.clear()
     for cur in temp:
@@ -338,7 +327,6 @@ def refresh():
         cGr = cur.grade
         i = 0
         while not ((sYr==cYr) and (sSem == cSem)):
-            print("Start year = "+str(sYr)+" start sem = "+sSem)
             temp = forward_one(sSem, sYr)
             sSem = temp[0]
             sYr = int(temp[1])
@@ -346,7 +334,7 @@ def refresh():
 
         existing_courses = [c for c in courses if c.sem == cSem and c.year == cYr]
         coun = len(existing_courses)
-        added(big_frames[i], coun, cCo, cTi, cCr, cGr, cSem, cYr)
+        added(big_frames[i], i, coun, cCo, cTi, cCr, cGr, cSem, cYr)
 
 # SAVE METHOD
 def save():
@@ -446,14 +434,13 @@ def open_file():
                         sSem=startsem
                         i = 0
                         while not ((sYr==cYr) and (sSem == cSe)):
-                            print("Start year = "+str(sYr)+" start sem = "+sSem)
                             temp = forward_one(sSem, sYr)
                             sSem = temp[0]
                             sYr = int(temp[1])
                             i+=1
                         existing_courses = [c for c in courses if c.sem == cSe and c.year == cYr]
                         coun = len(existing_courses)
-                        added(big_frames[i], coun, cCo, cTi, cCr, cGr, cSe, cYr)
+                        added(big_frames[i], i, coun, cCo, cTi, cCr, cGr, cSe, cYr)
                         l = 1  # Reset line count after processing the course
 
     root.focus_force()
@@ -467,11 +454,11 @@ def course_page(year, sem):
     st = str(sem) + " " + str(year)
     clear_window()
     make_canvas()
-    i = 11
+    i = 0
     j = 0
     cur = str(sem)
     
-    while i > 0:
+    while i < 11:
         nex = Label(canvas, text=cur + " " + str(year), font=("Helvetica", 20), borderwidth=0, relief="solid")
         nex.grid(column=j, row=0, padx=10, pady=0)  # Add padding for spacing
 
@@ -480,8 +467,8 @@ def course_page(year, sem):
         fram.grid_propagate(False)
         fram.grid_columnconfigure(0, weight=1)  # Center horizontally
         big_frames.append(fram)
-        btn = Button(fram, text="+", fg="black", command=lambda f=fram, s=cur, y=year: add(f, 0, s, y))
-        btn.grid(column=0, row=0)  # Add padding for spacing
+        btn = Button(canvas, text="+", fg="black", command=lambda jo = j, f=fram, s=cur, y=year: add(f, jo, 0, s, y))
+        btn.place(x=87+(i*220), y=45)  # Add padding for spacing
         button_references.append(btn)
 
     
@@ -495,7 +482,7 @@ def course_page(year, sem):
         else:
             cur = "Fall"
         
-        i -= 1
+        i += 1
         j += 1  # Keep incrementing the column number
     pass
 
