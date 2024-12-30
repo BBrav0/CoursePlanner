@@ -271,14 +271,28 @@ def added(ogframe, f_offset, count, co, ti, cr, gr, se, ye):
         sSem = startsem
         sYr = startyear
         i=0
-        cur_credits[i].configure(text=f"Current Credits\nCompleted: {calc_cur_creds(sSem, sYr)}")
         while not ((sYr==ye) and (sSem == se)):
             temp = forward_one(sSem, sYr)
             sSem = temp[0]
             sYr = int(temp[1])
             i+=1
-            cur_credits[i].configure(text=f"Current Credits\nCompleted: {calc_cur_creds(sSem, sYr)}")
         term_infos[i].configure(text=f"Term GPA: {calc_term_gpa(se, ye):.3f}")
+
+    i = 0
+    sSem = startsem
+    sYr = startyear
+    while i < 11:
+        temp = forward_one(sSem, sYr)
+        sSem = temp[0]
+        sYr = int(temp[1])
+        i+=1
+    i = 0
+    while i < 11:
+        j=0
+        while j < i:
+            cur_credits[i].configure(text=f"Current Credits\nCompleted: {calc_cur_creds(sSem, sYr)}")
+            j+=1
+        i+=1
 
     if count < 7: 
          btn.place(x=87+(f_offset*220),y=45+((count+1)*75))
@@ -531,22 +545,19 @@ def course_page(year, sem):
 
 # CALCULATE CURRENT TOTAL CREDITS
 def calc_cur_creds(s, y):
-    print(f"starting! Startsem = {startsem} Startyear = {startyear} cur sem = {s} cur year = {y}")
     sYr = int(startyear)
     y=int(y)
     sSem = startsem
-    creds = 1
+    creds = 0
     while not ((sYr==y) and (sSem == s)):
-        print(f"Checking Semester: {sSem}, Year: {sYr}")
         for c in courses:
+            print(f"{c.credits} from {c.sem} and {c.year}, comparing to {sSem} and {sYr}")
             if (c.sem == sSem) and (c.year==sYr):
-                creds+=c.credits
+                print(f"Credits = {c.credits}")
+                creds+=int(c.credits)
         temp = forward_one(sSem, sYr)
         sYr = int(temp[1])
         sSem = temp[0]
-        if sYr > y:
-            print("Infinite loop detected! Exiting...")
-            break
     return creds
 
 # CALCULATE TERM GPA
