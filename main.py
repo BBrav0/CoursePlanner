@@ -140,6 +140,8 @@ def start_coursepage():
     startsem = "Fall"
     startyear = 0
     courses.clear()
+    term_infos.clear()
+    cur_credits.clear()
     try:
         startyear = int(txt.get())
         startsem = variable.get()
@@ -269,11 +271,13 @@ def added(ogframe, f_offset, count, co, ti, cr, gr, se, ye):
         sSem = startsem
         sYr = startyear
         i=0
+        cur_credits[i].configure(text=f"Current Credits\nCompleted: {calc_cur_creds(sSem, sYr)}")
         while not ((sYr==ye) and (sSem == se)):
             temp = forward_one(sSem, sYr)
             sSem = temp[0]
             sYr = int(temp[1])
             i+=1
+            cur_credits[i].configure(text=f"Current Credits\nCompleted: {calc_cur_creds(sSem, sYr)}")
         term_infos[i].configure(text=f"Term GPA: {calc_term_gpa(se, ye):.3f}")
 
     if count < 7: 
@@ -462,6 +466,7 @@ def open_file():
                         added(big_frames[i], i, coun, cCo, cTi, cCr, cGr, cSe, cYr)
                         calc_cum_gpa()
                         gpa.configure(text=f"Cumulative GPA: {cum_gpa:.3f}")
+
                         l = 1  # Reset line count after processing the course
 
     root.focus_force()
@@ -499,6 +504,10 @@ def course_page(year, sem):
         term.grid(column=j, row=2, padx=10, pady=(5,0))  # Add padding for spacing
         term_infos.append(term)
 
+        cur_credit = Label(canvas, text=f"Current Credits\nCompleted: 0",font=("Helvetica", 20), borderwidth=0, relief="solid")
+        cur_credit.grid(column=j, row=3, padx=10, pady=(3,0))
+        cur_credits.append(cur_credit)
+
         # Update semester and year
         if cur == "Fall":
             cur = "Spring"
@@ -511,7 +520,7 @@ def course_page(year, sem):
         i += 1
         j += 1  # Keep incrementing the column number
     pass
-    bottom_frame = Frame(root, height=150, width=1920)
+    bottom_frame = Frame(root, height=100, width=1920)
     bottom_frame.pack(side=BOTTOM, anchor=CENTER)
     bottom_frame.pack_propagate(False)
     bottom_frame.grid_propagate(False)
@@ -519,6 +528,26 @@ def course_page(year, sem):
     calc_cum_gpa()
     gpa = Label(bottom_frame, text=f"Cumulative GPA: {cum_gpa:.3f}",font=("Times New Roman", 30, "bold"))
     gpa.pack(side=LEFT, padx=(200, 0))
+
+# CALCULATE CURRENT TOTAL CREDITS
+def calc_cur_creds(s, y):
+    print(f"starting! Startsem = {startsem} Startyear = {startyear} cur sem = {s} cur year = {y}")
+    sYr = int(startyear)
+    y=int(y)
+    sSem = startsem
+    creds = 1
+    while not ((sYr==y) and (sSem == s)):
+        print(f"Checking Semester: {sSem}, Year: {sYr}")
+        for c in courses:
+            if (c.sem == sSem) and (c.year==sYr):
+                creds+=c.credits
+        temp = forward_one(sSem, sYr)
+        sYr = int(temp[1])
+        sSem = temp[0]
+        if sYr > y:
+            print("Infinite loop detected! Exiting...")
+            break
+    return creds
 
 # CALCULATE TERM GPA
 def calc_term_gpa(s, y):
@@ -646,6 +675,9 @@ cum_gpa = 0.000
 
 global term_infos
 term_infos = []
+
+global cur_credits
+cur_credits = []
 
 global year_offset
 year_offset = 210+210+210
