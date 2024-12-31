@@ -4,7 +4,7 @@ from tkinter import filedialog
 from tkinter import font
 import copy
 
-#COURSE CLASS
+# COURSE CLASS
 class Course:
     def __init__(self, co, ti, cr, gr, se, ye):
         self.code = co
@@ -138,8 +138,10 @@ def forward_one(sem, year):
 def start_coursepage():
     global startyear
     global startsem
+    global totalyears
     startsem = "Fall"
     startyear = 0
+    totalyears=4
     courses.clear()
     term_infos.clear()
     cur_credits.clear()
@@ -147,9 +149,10 @@ def start_coursepage():
     try:
         startyear = int(txt.get())
         startsem = variable.get()
+        totalyears= int(tot_input.get())
         root.title("Ben's Course Planner (Not Saved)")
         mark_unsaved()
-        course_page(startyear, startsem)
+        course_page(startyear, startsem, totalyears)
     except ValueError:
         lbl.configure(text="Incorrect input. Please try again")
 
@@ -177,6 +180,14 @@ def start_win():
 
     drp = OptionMenu(root, variable, *sems)
     drp.pack(side=TOP, padx=10, pady=10)
+
+    global tot_lbl
+    tot_lbl = Label(root, text="Please enter your total number of years (e.g. 4)", borderwidth=2, relief="solid")
+    tot_lbl.pack(side=TOP, padx=10, pady=10)
+
+    global tot_input
+    tot_input = Entry(root, width=10, borderwidth=2, relief="solid")
+    tot_input.pack(side=TOP, padx=10, pady=10)
 
     btn = Button(root, text="Submit", fg="black", command=start_coursepage, borderwidth=2, relief="solid")
     btn.pack(side=TOP, padx=10, pady=10)
@@ -302,6 +313,7 @@ def added(ogframe, f_offset, count, co, ti, cr, gr, se, ye):
     except NameError:
         pass
 
+# BUTTON PRESS METHOD FOR EDIT POPUP
 def confirm_action(co, ti, cre, variable, ogcode, ogtitle, sem, year):
     # Get the values from the Entry widgets
     code = co.get()
@@ -315,6 +327,7 @@ def confirm_action(co, ti, cre, variable, ogcode, ogtitle, sem, year):
     courses.append(Course(code, title, creds, grade, sem, year))
     refresh()
 
+# EDIT BUTTON POPUP
 def edit_confirm(code, title, frame, count, f_offset):
     ogcode = code
     ogtitle = title
@@ -427,7 +440,7 @@ def refresh():
     c_scroll = my_canvas.xview()
     clear_window()
     make_canvas()
-    course_page(startyear, startsem)
+    course_page(startyear, startsem, totalyears)
     temp = copy.deepcopy(courses)
     courses.clear()
     for cur in temp:
@@ -455,7 +468,7 @@ def refresh():
 def save():
     with open(file_path, 'w') as file:
         root.title("Ben's Course Planner ("+file.name+")")
-        file.write(startsem+" "+str(startyear)+"\n")
+        file.write(startsem+" "+str(startyear)+" "+str(totalyears)+"\n")
         for c in courses:
             file.write("code="+c.code+"\n")
             file.write("title="+c.title+"\n")
@@ -479,7 +492,7 @@ def save_as():
         # Save file operation
         with open(file_path, 'w') as file:
             root.title("Ben's Course Planner ("+file.name+")")
-            file.write(startsem+" "+str(startyear)+"\n")
+            file.write(startsem+" "+str(startyear)+" "+str(totalyears)+"\n")
             for c in courses:
                 file.write("code="+c.code+"\n")
                 file.write("title="+c.title+"\n")
@@ -516,6 +529,7 @@ def open_file():
             cYr = 0
             global startsem
             global startyear
+            global totalyears
             for line in file:
                 match l:
                     case 0:
@@ -524,7 +538,8 @@ def open_file():
                         sSem = cur[0]
                         startyear = sYr
                         startsem = sSem
-                        course_page(sYr, sSem)
+                        totalyears = int(cur[2])
+                        course_page(sYr, sSem, totalyears)
                         l += 1
                     case 1:
                         cCo = line.split('=')[1].strip()
@@ -565,7 +580,7 @@ def open_file():
 #
 # COURSE PAGE BUILD
 #
-def course_page(year, sem):
+def course_page(year, sem, totyears):
     item.entryconfig('Save as', state="normal")
     item.entryconfig('New', state="normal")
     global big_frames
@@ -582,7 +597,7 @@ def course_page(year, sem):
     term_credits.clear()
     button_references.clear()
     cur_credits.clear()
-    while i < 11:
+    while i < (3*totyears)-1 :
         nex = Label(canvas, text=cur + " " + str(year), font=("Helvetica", 20), borderwidth=0, relief="solid")
         nex.grid(column=j, row=0, padx=10, pady=0)  # Add padding for spacing
 
@@ -630,6 +645,7 @@ def course_page(year, sem):
     gpa = Label(bottom_frame, text=f"Cumulative GPA: {cum_gpa:.3f}",font=("Times New Roman", 30, "bold"))
     gpa.pack(side=LEFT, padx=(200, 0))
 
+# CALCULATE CREDITS IN TERM
 def calc_term_creds(s, y):
     creds = 0
     for c in courses:
