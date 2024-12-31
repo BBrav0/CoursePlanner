@@ -231,8 +231,29 @@ def add(frame, f_offset, count, sem ,yer):
     cred = Entry(popup, width=5, borderwidth=2, relief="solid")
     cred.place(x=100, y=100)
 
-    btn = Button(popup, text="Add", fg="black", command=lambda f=frame, c=count, fo=f_offset: (mark_unsaved(), added(f, fo, c, code.get(), title.get(), cred.get(), variable.get(), sem, yer)), borderwidth=2, relief="solid")
+    btn = Button(popup, text="Add", fg="black", 
+        command=lambda f=frame, c=count, fo=f_offset: (
+            mark_unsaved(), 
+            added(f, fo, c, 
+                code.get(), 
+                title.get(), 
+                safe_get_ints(cred.get()),  # Use the helper function here
+                variable.get(), 
+                sem, 
+                yer
+            )
+        ), 
+        borderwidth=2, relief="solid"
+    )
+
     btn.pack(side=BOTTOM, pady=50)
+
+# CREDIT INPUT CHECKER
+def safe_get_ints(entry):
+    try:
+        return int(entry.strip())
+    except ValueError:
+        return 0
 
 # COURSE ADDED BUTTON
 def added(ogframe, f_offset, count, co, ti, cr, gr, se, ye):
@@ -297,7 +318,7 @@ def added(ogframe, f_offset, count, co, ti, cr, gr, se, ye):
     i = 0
     sSem = startsem
     sYr = startyear
-    while i < 11:
+    while i < (3*totalyears)-1 :
         cur_credits[i].configure(text=f"Current Credits\nCompleted: {calc_cur_creds(sSem, sYr)}")
         term_credits[i].configure(text=f"Credits: {calc_term_creds(sSem, sYr)}")
         temp = forward_one(sSem, sYr)
@@ -318,7 +339,7 @@ def confirm_action(co, ti, cre, variable, ogcode, ogtitle, sem, year):
     # Get the values from the Entry widgets
     code = co.get()
     title = ti.get()
-    creds = cre.get()
+    creds = safe_get_ints(cre.get())
     grade = variable.get()
 
     # Perform the required actions
@@ -387,7 +408,6 @@ def edit_confirm(code, title, frame, count, f_offset):
     btn = Button(popup, text="Confirm", fg="black", command=lambda: confirm_action(co, ti, cre, variable, ogcode, ogtitle, sem, year), borderwidth=2, relief="solid")
     btn.pack(side=BOTTOM, pady=50)
 
- 
 # REMOVE POPUP CONFIRMATION
 def remove_confirm(c, t):
     global confirm
@@ -510,7 +530,6 @@ def open_file():
         defaultextension=".txt",  # Set default file extension
         filetypes=[("Text Files", "*.txt")],  # File type filters
     )
-
     if file_path:
         item.entryconfig('Save', state="normal")
         with open(file_path, "r") as file:
@@ -548,7 +567,7 @@ def open_file():
                         cTi = line.split('=')[1].strip()
                         l += 1
                     case 3:
-                        cCr = line.split('=')[1].strip()
+                        cCr = int(line.split('=')[1].strip())
                         l += 1
                     case 4:
                         cGr = line.split('=')[1].strip()
@@ -643,7 +662,19 @@ def course_page(year, sem, totyears):
     global gpa
     calc_cum_gpa()
     gpa = Label(bottom_frame, text=f"Cumulative GPA: {cum_gpa:.3f}",font=("Times New Roman", 30, "bold"))
-    gpa.pack(side=LEFT, padx=(200, 0))
+    gpa.pack(side=LEFT, padx=(300, 0))
+
+    global total_credits
+    total_credits= Label(bottom_frame, text=f"Total Credits: {calc_total_creds()}",font=("Times New Roman", 30, "bold"))
+    total_credits.pack(side=RIGHT, padx=(0, 300))
+
+# CALCULATE TOTAL CREDITS
+def calc_total_creds():
+    creds = 0
+    for c in courses:
+        if(not(c.grade=="F")):
+            creds+=int(c.credits)
+    return creds
 
 # CALCULATE CREDITS IN TERM
 def calc_term_creds(s, y):
