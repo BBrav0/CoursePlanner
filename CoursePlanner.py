@@ -268,7 +268,7 @@ def added(ogframe, f_offset, count, co, ti, cr, gr, se, ye):
     code = Label(frame, text=co, fg="black", font=("Helvetica", 12, "bold"), bg="lightgrey")
     code.place(x=5, y=5)
 
-    title = Label(frame, text=ti, fg="black", font=("Helvetica", 14), bg="lightgrey", wraplength=144)
+    title = Label(frame, text=ti, fg="black", font=("Helvetica", 14), bg="lightgrey", wraplength=143)
     title.place(x=5, y=20)
 
     credits = Label(frame, text=f"{cr} credits", fg="black", font=("Helvetica", 12, "bold"), bg="lightgrey")
