@@ -547,16 +547,14 @@ def calc_cur_creds(s, y):
     creds = 0
     while not ((sYr==y) and (sSem == s)):
         for c in courses:
-            print(f"{c.credits} from {c.sem} and {c.year}, comparing to {sSem} and {sYr}")
-            if (c.sem == sSem) and (c.year==sYr):
+            if (c.sem == sSem) and (c.year==sYr) and (not(c.grade=="F")):
                 print(f"Credits = {c.credits}")
                 creds+=int(c.credits)
         temp = forward_one(sSem, sYr)
         sYr = int(temp[1])
         sSem = temp[0]
     for c in courses:
-            print(f"{c.credits} from {c.sem} and {c.year}, comparing to {sSem} and {sYr}")
-            if (c.sem == sSem) and (c.year==sYr):
+            if (c.sem == sSem) and (c.year==sYr) and (not(c.grade=="F")):
                 print(f"Credits = {c.credits}")
                 creds+=int(c.credits)
     return creds
