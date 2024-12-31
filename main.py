@@ -282,16 +282,10 @@ def added(ogframe, f_offset, count, co, ti, cr, gr, se, ye):
     sSem = startsem
     sYr = startyear
     while i < 11:
+        cur_credits[i].configure(text=f"Current Credits\nCompleted: {calc_cur_creds(sSem, sYr)}")
         temp = forward_one(sSem, sYr)
         sSem = temp[0]
         sYr = int(temp[1])
-        i+=1
-    i = 0
-    while i < 11:
-        j=0
-        while j < i:
-            cur_credits[i].configure(text=f"Current Credits\nCompleted: {calc_cur_creds(sSem, sYr)}")
-            j+=1
         i+=1
 
     if count < 7: 
@@ -493,6 +487,8 @@ def course_page(year, sem):
     item.entryconfig('New', state="normal")
     global big_frames
     big_frames=[]
+    global cur_credits
+    cur_credits = []
     st = str(sem) + " " + str(year)
     clear_window()
     make_canvas()
@@ -558,6 +554,11 @@ def calc_cur_creds(s, y):
         temp = forward_one(sSem, sYr)
         sYr = int(temp[1])
         sSem = temp[0]
+    for c in courses:
+            print(f"{c.credits} from {c.sem} and {c.year}, comparing to {sSem} and {sYr}")
+            if (c.sem == sSem) and (c.year==sYr):
+                print(f"Credits = {c.credits}")
+                creds+=int(c.credits)
     return creds
 
 # CALCULATE TERM GPA
