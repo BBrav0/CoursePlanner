@@ -1,7 +1,7 @@
 from tkinter import *
 from tkinter import ttk
 from tkinter import filedialog
-from tkinter import font
+from tkinter import messagebox
 import copy
 
 # COURSE CLASS
@@ -811,6 +811,14 @@ def calc_cum_gpa():
     else:
         cum_gpa=0.0
   
+def on_closing():
+    # Display a confirmation dialog
+    if (root.wm_title()[-1] == "*"):
+        if messagebox.askokcancel("Quit", "You have unsaved changes. Quit anyway?"):
+            root.destroy()  # Close the application
+    else:
+        root.destroy()
+    # Otherwise, the window stays open
 #
 # WINDOW SETUP
 #
@@ -864,6 +872,7 @@ global year_offset
 year_offset = 210+210+210
 
 start_win()
+root.protocol("WM_DELETE_WINDOW", on_closing)
 root.lift()
 root.focus_force()
 
