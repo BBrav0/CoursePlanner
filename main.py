@@ -1,6 +1,7 @@
 from tkinter import *
 from tkinter import ttk
 from tkinter import filedialog
+from tkinter import font
 import copy
 
 #COURSE CLASS
@@ -221,7 +222,6 @@ def add(frame, f_offset, count, sem ,yer):
 
     btn = Button(popup, text="Add", fg="black", command=lambda f=frame, c=count, fo=f_offset: (mark_unsaved(), added(f, fo, c, code.get(), title.get(), cred.get(), variable.get(), sem, yer)), borderwidth=2, relief="solid")
     btn.pack(side=BOTTOM, pady=50)
-    button_references.append(btn)
 
 # COURSE ADDED BUTTON
 def added(ogframe, f_offset, count, co, ti, cr, gr, se, ye):
@@ -231,7 +231,6 @@ def added(ogframe, f_offset, count, co, ti, cr, gr, se, ye):
     frame = Frame(canvas, borderwidth=3, relief="raised", width=180, height=70, bg="lightgrey")
     # Place the frame in the grid
     frame.place(x=20+(f_offset*220),y=45+(count*75))
-    #f_offset*100
 
     # Display course details
     code = Label(frame, text=co, fg="black", font=("Helvetica", 12, "bold"), bg="lightgrey")
@@ -243,8 +242,8 @@ def added(ogframe, f_offset, count, co, ti, cr, gr, se, ye):
     credits = Label(frame, text=f"{cr} credits", fg="black", font=("Helvetica", 12, "bold"), bg="lightgrey")
     credits.place(x=120, y=40)
 
-    grade = Label(frame, text=gr, fg="black", font=("Helvetica", 12, "bold"), bg="lightgrey")
-    grade.place(x=150, y=5)
+    grade = Label(frame, text=gr, fg="black", font=('default', 15, "bold"), bg="lightgrey")
+    grade.place(x=123, y=0)
 
     root.update_idletasks()
     for b in button_references:
@@ -257,9 +256,14 @@ def added(ogframe, f_offset, count, co, ti, cr, gr, se, ye):
                      command=lambda f=ogframe, fo = f_offset, c=count+1: (add(f, fo, c, se, ye)), borderwidth=2, relief="solid")
     
     remov = Canvas(frame, width=14, height=15, bg="white", highlightthickness=2)
-    remov.place(x=151, y=23)
-    remov.create_text(9, 9, text="X", fill="red", font=("Helvetica", 15, "bold"), anchor="center")
+    remov.place(x=151, y=24)
+    remov.create_text(9, 9, text="❌", font=("Helvetica", 15, "bold"), anchor="center")
     remov.bind("<Button-1>", lambda event: remove_confirm(code.cget("text"), title.cget("text")))
+
+    edit = Canvas(frame, width=14, height=15, bg="white", highlightthickness=2)
+    edit.place(x=151, y=2)
+    edit.create_text(9, 9, text="🖋️", font=("Helvetica", 15, "bold"), anchor="center")
+    edit.bind("<Button-1>", lambda event, f=f_offset: edit_confirm(code.cget("text"), title.cget("text"), ogframe, count, f))
 
     frame.bind("<Button-1>", lambda event: drag_start(event, co, ti))
     frame.bind("<B1-Motion>", drag_motion)
@@ -298,6 +302,79 @@ def added(ogframe, f_offset, count, co, ti, cr, gr, se, ye):
     except NameError:
         pass
 
+def confirm_action(co, ti, cre, variable, ogcode, ogtitle, sem, year):
+    # Get the values from the Entry widgets
+    code = co.get()
+    title = ti.get()
+    creds = cre.get()
+    grade = variable.get()
+
+    # Perform the required actions
+    mark_unsaved()
+    remove(ogcode, ogtitle)
+    courses.append(Course(code, title, creds, grade, sem, year))
+    refresh()
+
+def edit_confirm(code, title, frame, count, f_offset):
+    ogcode = code
+    ogtitle = title
+    grade = "-"
+    credits = 0
+    sem = "Fall"
+    year = 0
+    for c in courses:
+        if c.code == code and c.title == title:
+            grade = c.grade
+            credits = c.credits
+            sem = c.sem
+            year = c.year
+            break
+
+    global popup
+    popup = Toplevel(root)
+    popup.title("Edit Course")
+    popup.geometry('600x400')
+
+    popup.lift()
+    popup.focus_force()
+
+    nex = Label(popup, text="Course Code", borderwidth=2, relief="solid")
+    nex.place(x=0, y=0)
+
+    nex = Label(popup, text="Course Title", borderwidth=2, relief="solid")
+    nex.place(x=0, y=50)
+
+    nex = Label(popup, text="Credits", borderwidth=2, relief="solid")
+    nex.place(x=0, y=100)
+
+    nex = Label(popup, text="Grade", borderwidth=2, relief="solid")
+    nex.place(x=0, y=150)
+
+    grades = ["-","A","A-","B+","B","B-","C+","C","C-","D+","D","D-","F"]
+
+    variable = StringVar(root)
+    variable.set(grade)
+
+    gr = OptionMenu(popup, variable, *grades)
+    gr.place(x=100, y=150)
+
+    co = Entry(popup, width=15, borderwidth=2, relief="solid")
+    co.insert(0, code)
+    co.place(x=100, y=0)
+
+    ti = Entry(popup, width=20, borderwidth=2, relief="solid")
+    ti.insert(0, title)
+    ti.place(x=100, y=50)
+
+    cre = Entry(popup, width=5, borderwidth=2, relief="solid")
+    cre.insert(0, credits)
+    cre.place(x=100, y=100)
+
+    # Now pass the values to the confirm_action function when the button is pressed
+    btn = Button(popup, text="Confirm", fg="black", command=lambda: confirm_action(co, ti, cre, variable, ogcode, ogtitle, sem, year), borderwidth=2, relief="solid")
+    btn.pack(side=BOTTOM, pady=50)
+
+ 
 # REMOVE POPUP CONFIRMATION
 def remove_confirm(c, t):
     global confirm
@@ -328,7 +405,10 @@ def mark_unsaved():
 
 # REMOVE
 def remove(c ,t):
-    confirm.destroy()
+    try:
+        confirm.destroy()
+    except NameError:
+        pass
     i = 0
     seme = ""
     yea = 0
