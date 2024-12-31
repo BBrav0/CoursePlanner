@@ -16,7 +16,8 @@ class Course:
 # MAKE CANVAS
 def make_canvas():
    # Create A Main frame
-    global my_canvas
+    global my_canvas, canvas
+    # Create Main frame
     main_frame = Frame(root)
     main_frame.pack(fill=BOTH,expand=1)
     sec = Frame(main_frame)
@@ -28,7 +29,6 @@ def make_canvas():
     my_canvas.configure(xscrollcommand=x_scrollbar.set)
     my_canvas.bind("<Configure>",lambda e: my_canvas.config(scrollregion= my_canvas.bbox(ALL))) 
     # Create Another Frame INSIDE the Canvas
-    global canvas
     canvas = Frame(my_canvas)
     # Add that New Frame a Window In The Canvas
     my_canvas.create_window((0,0),window= canvas, anchor="nw")
@@ -343,6 +343,7 @@ def remove(c ,t):
 
 # REFRESH COURSE PAGE    
 def refresh():
+    c_scroll = my_canvas.xview()
     clear_window()
     make_canvas()
     course_page(startyear, startsem)
@@ -367,6 +368,7 @@ def refresh():
         existing_courses = [c for c in courses if c.sem == cSem and c.year == cYr]
         coun = len(existing_courses)
         added(big_frames[i], i, coun, cCo, cTi, cCr, cGr, cSem, cYr)
+    my_canvas.xview_moveto(c_scroll[0])
 
 # SAVE METHOD
 def save():
@@ -548,14 +550,12 @@ def calc_cur_creds(s, y):
     while not ((sYr==y) and (sSem == s)):
         for c in courses:
             if (c.sem == sSem) and (c.year==sYr) and (not(c.grade=="F")):
-                print(f"Credits = {c.credits}")
                 creds+=int(c.credits)
         temp = forward_one(sSem, sYr)
         sYr = int(temp[1])
         sSem = temp[0]
     for c in courses:
             if (c.sem == sSem) and (c.year==sYr) and (not(c.grade=="F")):
-                print(f"Credits = {c.credits}")
                 creds+=int(c.credits)
     return creds
 
