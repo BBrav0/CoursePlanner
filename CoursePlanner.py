@@ -214,7 +214,7 @@ def add(frame, f_offset, count, sem ,yer):
     nex = Label(popup, text="Grade", borderwidth=2, relief="solid")
     nex.place(x=0, y=150)
 
-    grades = ["-","A","A-","B+","B","B-","C+","C","C-","D+","D","D-","F"]
+    grades = ["-","A","A-","B+","B","B-","C+","C","C-","D+","D","D-","F","S","NC"]
 
     variable = StringVar(root)
     variable.set(grades[0])
@@ -385,7 +385,7 @@ def edit_confirm(code, title, frame, count, f_offset):
     nex = Label(popup, text="Grade", borderwidth=2, relief="solid")
     nex.place(x=0, y=150)
 
-    grades = ["-","A","A-","B+","B","B-","C+","C","C-","D+","D","D-","F"]
+    grades = ["-","A","A-","B+","B","B-","C+","C","C-","D+","D","D-","F","S","NC"]
 
     variable = StringVar(root)
     variable.set(grade)
@@ -694,7 +694,7 @@ def add_year(i):
 def calc_total_creds():
     creds = 0
     for c in courses:
-        if(not(c.grade=="F")):
+        if(not(c.grade=="F")) and (not(c.grade=="NC")):
             creds+=int(c.credits)
     return creds
 
@@ -702,7 +702,7 @@ def calc_total_creds():
 def calc_term_creds(s, y):
     creds = 0
     for c in courses:
-        if (c.sem == s) and (c.year==y) and (not(c.grade=="F")):
+        if (c.sem == s) and (c.year==y) and (not(c.grade=="F")) and (not(c.grade=="F")):
             creds+=int(c.credits)
     if creds>16:
         return str(creds)+" ⚠️"
@@ -716,13 +716,13 @@ def calc_cur_creds(s, y):
     creds = 0
     while not ((sYr==y) and (sSem == s)):
         for c in courses:
-            if (c.sem == sSem) and (c.year==sYr) and (not(c.grade=="F")):
+            if (c.sem == sSem) and (c.year==sYr) and (not(c.grade=="F")) and (not(c.grade=="NC")):
                 creds+=int(c.credits)
         temp = forward_one(sSem, sYr)
         sYr = int(temp[1])
         sSem = temp[0]
     for c in courses:
-            if (c.sem == sSem) and (c.year==sYr) and (not(c.grade=="F")):
+            if (c.sem == sSem) and (c.year==sYr) and (not(c.grade=="F"))and (not(c.grade=="NC")):
                 creds+=int(c.credits)
     return creds
 
@@ -735,8 +735,12 @@ def calc_term_gpa(s, y):
     for c in courses:
         if (c.sem ==s) and (c.year==y):
             match c.grade:
-                case "":
-                    grade_points = 0.0
+                case "-":
+                    continue
+                case "S":
+                    continue
+                case "NC":
+                    continue
                 case "A":
                     grade_points = 4.0
                 case "A-":
@@ -779,6 +783,10 @@ def calc_cum_gpa():
     for c in courses:
         match c.grade:
             case "-":
+                continue
+            case "S":
+                continue
+            case "NC":
                 continue
             case "A":
                 grade_points = 4.0
