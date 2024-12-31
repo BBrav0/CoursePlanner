@@ -661,15 +661,35 @@ def course_page(year, sem, totyears):
     bottom_frame.pack(side=BOTTOM, anchor=CENTER)
     bottom_frame.pack_propagate(False)
     bottom_frame.grid_propagate(False)
+
+    but = Button(bottom_frame, text="Add Year", fg="black", command=lambda:add_year(0))
+    but.pack(side=LEFT, padx=10)
+
     global gpa
     calc_cum_gpa()
     gpa = Label(bottom_frame, text=f"Cumulative GPA: {cum_gpa:.3f}",font=("Times New Roman", 30, "bold"))
-    gpa.pack(side=LEFT, padx=(300, 0))
+    gpa.pack(side=LEFT, padx=(200, 0))
 
+    but = Button(bottom_frame, text="Add Year", fg="black", command=lambda:add_year(1))
+    but.pack(side=RIGHT, padx=10)
     global total_credits
     total_credits= Label(bottom_frame, text=f"Total Credits: {calc_total_creds()}",font=("Times New Roman", 30, "bold"))
-    total_credits.pack(side=RIGHT, padx=(0, 450))
+    total_credits.pack(side=RIGHT, padx=(0, 350))
 
+def add_year(i):
+    global totalyears
+    global startsem
+    global startyear
+    if i ==1:
+        totalyears+=1
+        
+    else:
+        while i < 3:
+            temp = back_one(startsem, startyear)
+            startsem = temp[0]
+            startyear = int(temp[1])
+            i+=1
+    refresh()
 # CALCULATE TOTAL CREDITS
 def calc_total_creds():
     creds = 0
