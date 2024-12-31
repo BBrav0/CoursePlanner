@@ -704,7 +704,7 @@ def calc_term_creds(s, y):
     for c in courses:
         if (c.sem == s) and (c.year==y) and (not(c.grade=="F")) and (not(c.grade=="F")):
             creds+=int(c.credits)
-    if creds>16:
+    if creds>18:
         return str(creds)+" ⚠️"
     return creds
 
