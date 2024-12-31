@@ -201,7 +201,7 @@ def add(frame, f_offset, count, sem ,yer):
     nex = Label(popup, text="Grade", borderwidth=2, relief="solid")
     nex.place(x=0, y=150)
 
-    grades = ["","A","A-","B+","B","B-","C+","C","C-","D+","D","D-","F"]
+    grades = ["-","A","A-","B+","B","B-","C+","C","C-","D+","D","D-","F"]
 
     variable = StringVar(root)
     variable.set(grades[0])
@@ -283,6 +283,7 @@ def added(ogframe, f_offset, count, co, ti, cr, gr, se, ye):
     sYr = startyear
     while i < 11:
         cur_credits[i].configure(text=f"Current Credits\nCompleted: {calc_cur_creds(sSem, sYr)}")
+        term_credits[i].configure(text=f"Credits: {calc_term_creds(sSem, sYr)}")
         temp = forward_one(sSem, sYr)
         sSem = temp[0]
         sYr = int(temp[1])
@@ -295,7 +296,6 @@ def added(ogframe, f_offset, count, co, ti, cr, gr, se, ye):
         popup.destroy()
     except NameError:
         pass
-
 
 # REMOVE POPUP CONFIRMATION
 def remove_confirm(c, t):
@@ -505,7 +505,12 @@ def course_page(year, sem):
         fram = Frame(canvas, borderwidth=5, relief="sunken", width=200, height=650)
         fram.grid(column=j, row=1, padx=10, pady=10)  # Add padding for spacing
         fram.grid_propagate(False)
+        fram.pack_propagate(False)
         fram.grid_columnconfigure(0, weight=1)  # Center horizontally
+
+        term_creds = Label(fram, text="Credits: 0",font=("Helvetica", 20), borderwidth=0, relief="solid")
+        term_creds.pack(side=BOTTOM)
+        term_credits.append(term_creds)
 
         big_frames.append(fram)
         btn = Button(canvas, text="+", fg="black", command=lambda jo = j, f=fram, s=cur, y=year: add(f, jo, 0, s, y))
@@ -540,6 +545,13 @@ def course_page(year, sem):
     calc_cum_gpa()
     gpa = Label(bottom_frame, text=f"Cumulative GPA: {cum_gpa:.3f}",font=("Times New Roman", 30, "bold"))
     gpa.pack(side=LEFT, padx=(200, 0))
+
+def calc_term_creds(s, y):
+    creds = 0
+    for c in courses:
+        if (c.sem == s) and (c.year==y) and (not(c.grade=="F")):
+            creds+=int(c.credits)
+    return creds
 
 # CALCULATE CURRENT TOTAL CREDITS
 def calc_cur_creds(s, y):
@@ -611,8 +623,8 @@ def calc_cum_gpa():
     cum_gpa=0.0
     for c in courses:
         match c.grade:
-            case "":
-                grade_points = 0.0
+            case "-":
+                continue
             case "A":
                 grade_points = 4.0
             case "A-":
@@ -685,6 +697,9 @@ cum_gpa = 0.000
 
 global term_infos
 term_infos = []
+
+global term_credits
+term_credits = []
 
 global cur_credits
 cur_credits = []
