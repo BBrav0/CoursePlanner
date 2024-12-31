@@ -142,6 +142,7 @@ def start_coursepage():
     courses.clear()
     term_infos.clear()
     cur_credits.clear()
+    term_credits.clear()
     try:
         startyear = int(txt.get())
         startsem = variable.get()
@@ -498,6 +499,9 @@ def course_page(year, sem):
     j = 0
     cur = str(sem)
     term_infos.clear()
+    term_credits.clear()
+    button_references.clear()
+    cur_credits.clear()
     while i < 11:
         nex = Label(canvas, text=cur + " " + str(year), font=("Helvetica", 20), borderwidth=0, relief="solid")
         nex.grid(column=j, row=0, padx=10, pady=0)  # Add padding for spacing
@@ -551,6 +555,8 @@ def calc_term_creds(s, y):
     for c in courses:
         if (c.sem == s) and (c.year==y) and (not(c.grade=="F")):
             creds+=int(c.credits)
+    if creds>16:
+        return str(creds)+" ⚠️"
     return creds
 
 # CALCULATE CURRENT TOTAL CREDITS
