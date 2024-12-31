@@ -303,6 +303,7 @@ def added(ogframe, f_offset, count, co, ti, cr, gr, se, ye):
 
     calc_cum_gpa()
     gpa.configure(text=f"Cumulative GPA: {cum_gpa:.3f}")
+    total_credits.configure(text=f"Total Credits: {calc_total_creds()}")
     
     for t in term_infos:
         sSem = startsem
@@ -492,7 +493,7 @@ def save():
         for c in courses:
             file.write("code="+c.code+"\n")
             file.write("title="+c.title+"\n")
-            file.write("credits="+c.credits+"\n")
+            file.write("credits="+str(c.credits)+"\n")
             file.write("grade="+c.grade+"\n")
             file.write("semester="+c.sem+"\n")
             file.write("year="+str(c.year)+"\n")
@@ -516,7 +517,7 @@ def save_as():
             for c in courses:
                 file.write("code="+c.code+"\n")
                 file.write("title="+c.title+"\n")
-                file.write("credits="+c.credits+"\n")
+                file.write("credits="+str(c.credits)+"\n")
                 file.write("grade="+c.grade+"\n")
                 file.write("semester="+c.sem+"\n")
                 file.write("year="+str(c.year)+"\n")
@@ -591,6 +592,7 @@ def open_file():
                         added(big_frames[i], i, coun, cCo, cTi, cCr, cGr, cSe, cYr)
                         calc_cum_gpa()
                         gpa.configure(text=f"Cumulative GPA: {cum_gpa:.3f}")
+                        total_credits.configure(text=f"Total Credits: {calc_total_creds()}")
 
                         l = 1  # Reset line count after processing the course
 
@@ -666,7 +668,7 @@ def course_page(year, sem, totyears):
 
     global total_credits
     total_credits= Label(bottom_frame, text=f"Total Credits: {calc_total_creds()}",font=("Times New Roman", 30, "bold"))
-    total_credits.pack(side=RIGHT, padx=(0, 300))
+    total_credits.pack(side=RIGHT, padx=(0, 450))
 
 # CALCULATE TOTAL CREDITS
 def calc_total_creds():
@@ -814,6 +816,7 @@ root.config(menu=menu)
 global canvas
 global my_canvas
 global gpa
+global total_credits
 make_canvas()
 
 global courses
