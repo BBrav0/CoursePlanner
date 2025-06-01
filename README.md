@@ -1,3 +1,8 @@
 # CoursePlanner
-A way to keep track of your courses
-Compling command: pyinstaller --clean --name "Ben\'s Course Planner" --noconsole --icon favicon.icns CoursePlanner.py
+
+A modern application to help students manage and plan their courses effectively.
+
+## Features
+
+- 📚 Course management and organization
+- 📅 Schedule planning and visualization
