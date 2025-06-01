@@ -682,13 +682,13 @@ def add_year(i):
     global startyear
     if i ==1:
         totalyears+=1
-        
     else:
         while i < 3:
             temp = back_one(startsem, startyear)
             startsem = temp[0]
             startyear = int(temp[1])
             i+=1
+        totalyears+=1
     refresh()
 # CALCULATE TOTAL CREDITS
 def calc_total_creds():
