@@ -260,9 +260,18 @@ def added(ogframe, f_offset, count, co, ti, cr, gr, se, ye):
     # Add course object to the list
     courses.append(Course(co, ti, cr, gr, se, ye))
     # Create the course frame
-    frame = Frame(canvas, borderwidth=3, relief="raised", width=180, height=70, bg="lightgrey")
+    frame = Frame(ogframe, borderwidth=3, relief="raised", width=180, height=70, bg="lightgrey")
     # Place the frame in the grid
-    frame.place(x=20+(f_offset*220),y=45+(count*75))
+    for b in button_references:
+         try:
+             if b.winfo_parent() == str(ogframe):
+                 b.destroy()
+         except TclError:
+             pass
+    btn = Button(ogframe, text="+", fg="black", 
+                     command=lambda f=ogframe, fo = f_offset, c=count+1: (add(f, fo, c, se, ye)))
+    
+    frame.grid(row=count+1, column=0, pady=5)  # Changed from pack to grid
 
     # Display course details
     code = Label(frame, text=co, fg="black", font=("Helvetica", 12, "bold"), bg="lightgrey")
@@ -278,14 +287,6 @@ def added(ogframe, f_offset, count, co, ti, cr, gr, se, ye):
     grade.place(x=123, y=0)
 
     root.update_idletasks()
-    for b in button_references:
-         try:
-             if b.winfo_x()==87+(f_offset*220):
-                 b.destroy()
-         except TclError:
-             pass
-    btn = Button(canvas, text="+", fg="black", 
-                     command=lambda f=ogframe, fo = f_offset, c=count+1: (add(f, fo, c, se, ye)), borderwidth=2, relief="solid")
     
     remov = Canvas(frame, width=14, height=15, bg="white", highlightthickness=2)
     remov.place(x=151, y=24)
@@ -328,7 +329,7 @@ def added(ogframe, f_offset, count, co, ti, cr, gr, se, ye):
         i+=1
 
     if count < 7: 
-         btn.place(x=87+(f_offset*220),y=45+((count+1)*75))
+         btn.grid(row=count+2, column=0, pady=5)
          button_references.append(btn)
     try:
         popup.destroy()
@@ -619,22 +620,26 @@ def course_page(year, sem, totyears):
     button_references.clear()
     cur_credits.clear()
     while i < (3*totyears)-1 :
+
+        #nex is the label for the semester and year
         nex = Label(canvas, text=cur + " " + str(year), font=("Helvetica", 20), borderwidth=0, relief="solid")
         nex.grid(column=j, row=0, padx=10, pady=0)  # Add padding for spacing
 
+        #fram is the frame for the courses
         fram = Frame(canvas, borderwidth=5, relief="sunken", width=200, height=650)
         fram.grid(column=j, row=1, padx=10, pady=10)  # Add padding for spacing
         fram.grid_propagate(False)
         fram.pack_propagate(False)
         fram.grid_columnconfigure(0, weight=1)  # Center horizontally
 
+        #term_creds is the label for the credits
         term_creds = Label(fram, text="Credits: 0",font=("Helvetica", 20), borderwidth=0, relief="solid")
         term_creds.pack(side=BOTTOM)
         term_credits.append(term_creds)
 
         big_frames.append(fram)
-        btn = Button(canvas, text="+", fg="black", command=lambda jo = j, f=fram, s=cur, y=year: add(f, jo, 0, s, y))
-        btn.place(x=87+(i*220), y=45)  # Add padding for spacing
+        btn = Button(fram, text="+", fg="black", command=lambda jo = j, f=fram, s=cur, y=year: add(f, jo, 0, s, y))
+        btn.grid(row=0, column=0, pady=10)  # Changed from pack to grid
         button_references.append(btn)
 
         term = Label(canvas, text=f"Term GPA: {calc_term_gpa(cur, year):.3f}", font=("Helvetica", 20), borderwidth=0, relief="solid")
