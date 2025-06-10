@@ -3,6 +3,7 @@ from tkinter import ttk
 from tkinter import filedialog
 from tkinter import messagebox
 import copy
+import jaraco.text
 
 # COURSE CLASS
 class Course:

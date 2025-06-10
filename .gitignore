@@ -26,3 +26,4 @@ ENV/
 
 # Build artifacts from py2app
 *.app/
+*.spec
