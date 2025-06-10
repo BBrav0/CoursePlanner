@@ -67,7 +67,7 @@ CoursePlanner allows students to:
 
 ## Getting Started
 
-Coming soon
+Download and run the DMG file, may require settings to be modified to trust the developer.
 
 ## Usage Tips
 
