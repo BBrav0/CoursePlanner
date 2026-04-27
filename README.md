@@ -1,6 +1,16 @@
 # CoursePlanner
 
-CoursePlanner is a powerful desktop application designed to help students plan and track their academic journey. Built with Python and Tkinter, this application provides an intuitive interface for managing courses, calculating GPAs, and visualizing your academic progress over multiple semesters.
+> This desktop app has been replaced by [CoursePlanner Web](https://courseplanner.benbravo.net).
+>
+> Use the web version here: https://courseplanner.benbravo.net
+
+CoursePlanner is the original desktop application I built to help students plan and track their academic journey. Built with Python and Tkinter, it provides an interface for managing courses, calculating GPAs, and visualizing academic progress across multiple semesters.
+
+## Status
+
+This repository is kept up as the original desktop version, but the actively recommended version is now **CoursePlanner Web**:
+
+- **Live site:** https://courseplanner.benbravo.net
 
 ## Overview
 
@@ -67,11 +77,11 @@ CoursePlanner allows students to:
 
 ## Getting Started
 
-Download and run the DMG file, may require settings to be modified to trust the developer.
+Download and run the DMG file. You may need to adjust your system settings to trust the developer.
 
 ## Usage Tips
 
 - Use drag-and-drop to easily move courses between semesters
 - Save your work regularly to prevent data loss
 - Monitor your GPA and credit hours as you add courses
-- Plan ahead by adding multiple years to your timeline 
+- Plan ahead by adding multiple years to your timeline
